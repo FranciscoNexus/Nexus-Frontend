@@ -237,8 +237,6 @@
             padding: 10px;
             border-radius: 6px;
             font-size: 14px;
-            position: relative;
-            z-index: 101;
         }
 
         .input-row label {
@@ -300,7 +298,7 @@
                     <input type="text" id="newGamePlatform" placeholder="Plataforma (Ex: PS2)">
                     <label>Capa (Arquivo do Celular):</label>
                     <input type="file" id="newGameCoverFile" accept="image/*">
-                    <label>Ou Cole a URL da Capa (Opcional):</label>
+                    <label>OU Cole a URL/Link da Capa (Mais fácil):</label>
                     <input type="text" id="newGameCoverUrl" placeholder="https://exemplo.com/capa.jpg">
                     <label>Tipo de Execução:</label>
                     <select id="newGameExecType">
@@ -324,7 +322,7 @@
                 <div class="input-row">
                     <label>Alterar Capa (Arquivo):</label>
                     <input type="file" id="editGameCoverFile" accept="image/*">
-                    <label>Ou URL da Capa:</label>
+                    <label>OU URL da Capa:</label>
                     <input type="text" id="editGameCoverUrl" placeholder="https://...">
                     <label>Tipo de Execução:</label>
                     <select id="editGameExecType">
@@ -472,7 +470,8 @@
             }
 
             const processAdd = (coverData) => {
-                games.push({ title, platform, cover: coverData || urlInput || '', execType });
+                const finalCover = coverData || urlInput || '';
+                games.push({ title, platform, cover: finalCover, execType });
                 saveData();
                 renderGames();
                 toggleSettings(false);
@@ -547,10 +546,10 @@
             sfx.play('select');
             
             if (game.execType === 'aethersx2') {
-                // Dispara o Intent para abrir o AetherSX2 no Android com segurança
+                // Abre o AetherSX2 no Android com segurança via Intent
                 window.location.href = "intent://#Intent;package=xyz.aethersx2.android;end;";
             } else {
-                alert(`Iniciando aplicativo nativo: ${game.title}`);
+                alert(`Iniciando app nativo: ${game.title}`);
             }
         }
 
@@ -578,7 +577,7 @@
                 }
             } else if (e.key === 'Enter' || e.key === ' ') {
                 launchGame();
-            } else if (e.key === 'x' || e.key === 'X') {
+            } else if (e.key === 'x' || e.key === 'X') preferir
                 toggleSettings(true);
             } else if (e.key === 'y' || e.key === 'Y') {
                 toggleSettings(true);
