@@ -91,7 +91,6 @@
             outline: 2px solid #ffffff;
         }
 
-        /* Área Central (Carrossel) */
         .carousel-container {
             flex: 1;
             display: flex;
@@ -148,7 +147,6 @@
             text-transform: uppercase;
         }
 
-        /* Cartão de Adicionar Jogo (+) no final do carrossel */
         .add-card {
             flex: 0 0 auto;
             width: var(--card-width);
@@ -183,7 +181,6 @@
             font-weight: bold;
         }
 
-        /* Rodapé Responsivo */
         .bottom-bar {
             display: flex;
             justify-content: center;
@@ -229,7 +226,6 @@
         .btn-x { background-color: #007AFF; color: #fff; }
         .btn-y { background-color: #FFCC00; }
 
-        /* Modais */
         .modal {
             position: fixed;
             top: 0;
@@ -300,6 +296,27 @@
             color: #aaa;
         }
 
+        .cover-tools {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .cover-tools button {
+            flex: 1;
+            background: #2b2b2b;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .cover-tools button:hover {
+            background: #3b3b3b;
+        }
+
         .search-results {
             max-height: 150px;
             overflow-y: auto;
@@ -316,9 +333,7 @@
             font-size: 13px;
         }
 
-        .search-item:hover {
-            background: #333;
-        }
+        .search-item:hover { background: #333; }
 
         .modal-actions {
             display: flex;
@@ -365,7 +380,7 @@
         <div class="button-hint" onclick="handleActionX()"><span class="btn-icon btn-x">X</span> Aleatório</div>
     </div>
 
-    <!-- Modal de Configurações Visuais e Temas (Engrenagem) -->
+    <!-- Modal de Configurações Visuais (Engrenagem) -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <h2>Configurações Visuais</h2>
@@ -403,11 +418,13 @@
                 <div class="input-row">
                     <input type="text" id="newGameTitle" placeholder="Título (Ex: God Of War II)">
                     <input type="text" id="newGamePlatform" placeholder="Plataforma (Ex: PS2)">
-                    <label>Capa (Arquivo do Celular):</label>
-                    <input type="file" id="newGameCoverFile" accept="image/*">
-                    <label>OU URL / Link da Capa:</label>
+                    <label>URL / Link da Capa:</label>
                     <input type="text" id="newGameCoverUrl" placeholder="https://exemplo.com/capa.jpg">
-                    <label>Emulador / Plataforma de Execução:</label>
+                    <div class="cover-tools">
+                        <button onclick="openSteamGridDB('newGameTitle', 'newGameCoverUrl')">🔍 SteamGridDB</button>
+                        <button onclick="openGoogleImages('newGameTitle')">🌐 Google Imagens</button>
+                    </div>
+                    <label style="margin-top: 6px;">Emulador / Plataforma de Execução:</label>
                     <select id="newGameExecType">
                         <option value="aethersx2">AetherSX2</option>
                         <option value="snes9x">Snes9x EX+</option>
@@ -420,7 +437,7 @@
                         <option value="native">Outro App / Nativo</option>
                     </select>
                 </div>
-                <button class="modal-btn primary" style="width: 100%" onclick="addNewGame()">Salvar Jogo</button>
+                <button class="modal-btn primary" style="width: 100%; margin-top: 5px;" onclick="addNewGame()">Salvar Jogo</button>
             </div>
             <div class="modal-actions">
                 <button class="modal-btn" onclick="toggleAddGame(false)">Fechar (B)</button>
@@ -428,17 +445,19 @@
         </div>
     </div>
 
-    <!-- Modal Configuração Individual do Jogo (Segurar A) -->
+    <!-- Modal Configuração Individual do Jogo -->
     <div class="modal" id="gameConfigModal">
         <div class="modal-content">
             <h2 id="editGameTitleModal">Configurar Jogo</h2>
             <div class="settings-group">
                 <div class="input-row">
-                    <label>Alterar Capa (Arquivo):</label>
-                    <input type="file" id="editGameCoverFile" accept="image/*">
-                    <label>OU URL da Capa:</label>
+                    <label>URL da Capa:</label>
                     <input type="text" id="editGameCoverUrl" placeholder="https://...">
-                    <label>Emulador / Plataforma:</label>
+                    <div class="cover-tools">
+                        <button onclick="openSteamGridDBForEdit()">🔍 SteamGridDB</button>
+                        <button onclick="openGoogleImagesForEdit()">🌐 Google Imagens</button>
+                    </div>
+                    <label style="margin-top: 6px;">Emulador / Plataforma:</label>
                     <select id="editGameExecType">
                         <option value="aethersx2">AetherSX2</option>
                         <option value="snes9x">Snes9x EX+</option>
@@ -451,7 +470,7 @@
                         <option value="native">Outro App / Nativo</option>
                     </select>
                 </div>
-                <button class="modal-btn primary" style="width: 100%" onclick="saveGameConfig()">Salvar Alterações</button>
+                <button class="modal-btn primary" style="width: 100%; margin-top: 5px;" onclick="saveGameConfig()">Salvar Alterações</button>
                 <button class="modal-btn danger" style="width: 100%; margin-top: 8px;" onclick="deleteCurrentGame()">Apagar Jogo</button>
             </div>
             <div class="modal-actions">
@@ -533,7 +552,6 @@
         let isSearchOpen = false;
         let holdTimer = null;
 
-        // Preferências Visuais Padrão
         let visualPrefs = {
             width: 180,
             radius: '10px',
@@ -555,18 +573,4 @@
             if (savedPrefs) {
                 visualPrefs = JSON.parse(savedPrefs);
                 applyVisualPrefs();
-            }
-        }
-
-        function saveData() {
-            localStorage.setItem('nexus_games', JSON.stringify(games));
-            localStorage.setItem('nexus_visual_prefs', JSON.stringify(visualPrefs));
-        }
-
-        function applyVisualPrefs() {
-            document.documentElement.style.setProperty('--card-width', visualPrefs.width + 'px');
-            document.documentElement.style.setProperty('--card-height', (visualPrefs.width * 1.44) + 'px');
-            
-            let rad = visualPrefs.radius;
-            if (rad === '50%circular') {
-                document.do
+           
