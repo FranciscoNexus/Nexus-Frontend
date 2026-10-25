@@ -237,6 +237,8 @@
             padding: 10px;
             border-radius: 6px;
             font-size: 14px;
+            position: relative;
+            z-index: 101;
         }
 
         .input-row label {
@@ -296,14 +298,15 @@
                 <div class="input-row">
                     <input type="text" id="newGameTitle" placeholder="Título (Ex: God Of War II)">
                     <input type="text" id="newGamePlatform" placeholder="Plataforma (Ex: PS2)">
-                    <label>Capa do Jogo (Galeria do Celular):</label>
+                    <label>Capa (Arquivo do Celular):</label>
                     <input type="file" id="newGameCoverFile" accept="image/*">
+                    <label>Ou Cole a URL da Capa (Opcional):</label>
+                    <input type="text" id="newGameCoverUrl" placeholder="https://exemplo.com/capa.jpg">
                     <label>Tipo de Execução:</label>
                     <select id="newGameExecType">
-                        <option value="aethersx2">AetherSX2 (PS2)</option>
-                        <option value="native">App Nativo / Outro Emulador</option>
+                        <option value="aethersx2">Abrir AetherSX2 (PS2)</option>
+                        <option value="native">Outro App / Nativo</option>
                     </select>
-                    <input type="text" id="newGameExecPath" placeholder="Nome do pacote ou URI (Ex: xyz.aethersx2.android)">
                 </div>
                 <button class="modal-btn primary" style="width: 100%" onclick="addNewGame()">Salvar Jogo</button>
             </div>
@@ -319,15 +322,15 @@
             <h2 id="editGameTitleModal">Configurar Jogo</h2>
             <div class="settings-group">
                 <div class="input-row">
-                    <label>Alterar Capa:</label>
+                    <label>Alterar Capa (Arquivo):</label>
                     <input type="file" id="editGameCoverFile" accept="image/*">
+                    <label>Ou URL da Capa:</label>
+                    <input type="text" id="editGameCoverUrl" placeholder="https://...">
                     <label>Tipo de Execução:</label>
                     <select id="editGameExecType">
-                        <option value="aethersx2">AetherSX2 (PS2)</option>
-                        <option value="native">App Nativo / Outro</option>
+                        <option value="aethersx2">Abrir AetherSX2 (PS2)</option>
+                        <option value="native">Outro App / Nativo</option>
                     </select>
-                    <label>Pacote do Emulador / App:</label>
-                    <input type="text" id="editGameExecPath" placeholder="Ex: xyz.aethersx2.android">
                 </div>
                 <button class="modal-btn primary" style="width: 100%" onclick="saveGameConfig()">Salvar Alterações</button>
                 <button class="modal-btn danger" style="width: 100%; margin-top: 10px;" onclick="deleteCurrentGame()">Remover Jogo</button>
@@ -460,16 +463,16 @@
             const title = document.getElementById('newGameTitle').value;
             const platform = document.getElementById('newGamePlatform').value;
             const fileInput = document.getElementById('newGameCoverFile');
+            const urlInput = document.getElementById('newGameCoverUrl').value;
             const execType = document.getElementById('newGameExecType').value;
-            const execPath = document.getElementById('newGameExecPath').value;
 
             if (!title || !platform) {
                 alert("Preencha ao menos o Título e a Plataforma.");
                 return;
             }
 
-            const processAdd = (coverBase64) => {
-                games.push({ title, platform, cover: coverBase64 || '', execType, execPath });
+            const processAdd = (coverData) => {
+                games.push({ title, platform, cover: coverData || urlInput || '', execType });
                 saveData();
                 renderGames();
                 toggleSettings(false);
@@ -478,7 +481,7 @@
                 document.getElementById('newGameTitle').value = '';
                 document.getElementById('newGamePlatform').value = '';
                 document.getElementById('newGameCoverFile').value = '';
-                document.getElementById('newGameExecPath').value = '';
+                document.getElementById('newGameCoverUrl').value = '';
             };
 
             if (fileInput.files && fileInput.files[0]) {
@@ -493,7 +496,7 @@
             const game = games[currentIndex];
             document.getElementById('editGameTitleModal').textContent = `Configurar: ${game.title}`;
             document.getElementById('editGameExecType').value = game.execType || 'aethersx2';
-            document.getElementById('editGameExecPath').value = game.execPath || '';
+            document.getElementById('editGameCoverUrl').value = '';
             gameConfigModal.classList.add('active');
             isGameConfigOpen = true;
             sfx.play('select');
@@ -506,26 +509,25 @@
 
         function saveGameConfig() {
             const fileInput = document.getElementById('editGameCoverFile');
+            const urlInput = document.getElementById('editGameCoverUrl').value;
             const execType = document.getElementById('editGameExecType').value;
-            const execPath = document.getElementById('editGameExecPath').value;
 
             games[currentIndex].execType = execType;
-            games[currentIndex].execPath = execPath;
 
-            const updateAndClose = () => {
+            const updateAndClose = (coverData) => {
+                if (coverData) games[currentIndex].cover = coverData;
+                else if (urlInput) games[currentIndex].cover = urlInput;
+                
                 saveData();
                 renderGames();
                 closeGameConfig();
-                    sfx.play('select');
+                sfx.play('select');
             };
 
             if (fileInput.files && fileInput.files[0]) {
-                getBase64(fileInput.files[0], (base64) => {
-                    games[currentIndex].cover = base64;
-                    updateAndClose();
-                });
+                getBase64(fileInput.files[0], updateAndClose);
             } else {
-                updateAndClose();
+                updateAndClose(null);
             }
         }
 
@@ -545,13 +547,10 @@
             sfx.play('select');
             
             if (game.execType === 'aethersx2') {
-                // Tenta disparar o Intent direto para abrir o AetherSX2 no Android
-                // Pacote padrão do AetherSX2: xyz.aethersx2.android
+                // Dispara o Intent para abrir o AetherSX2 no Android com segurança
                 window.location.href = "intent://#Intent;package=xyz.aethersx2.android;end;";
-            } else if (game.execPath) {
-                window.location.href = game.execPath;
             } else {
-                alert(`Iniciando: ${game.title}`);
+                alert(`Iniciando aplicativo nativo: ${game.title}`);
             }
         }
 
