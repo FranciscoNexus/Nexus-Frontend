@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend</title>
+    <title>Nexus Frontend v0.12 - Layout Responsivo</title>
     <style>
         :root {
             --card-width: 180px;
@@ -40,70 +40,107 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 25px;
+            padding: 10px 20px;
             z-index: 20;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent);
+            min-height: 50px;
         }
 
         .game-title {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 700;
             letter-spacing: 0.5px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 70vw;
+            max-width: 45vw;
         }
 
         .top-right-group {
             display: flex;
             align-items: center;
-            gap: 10px;
-            z-index: 20;
+            gap: 6px;
+            z-index: 21;
         }
 
         .battery-display {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             color: #dddddd;
             background: rgba(255, 255, 255, 0.08);
-            padding: 4px 8px;
+            padding: 4px 7px;
             border-radius: 6px;
+        }
+
+        .top-ctrl-btn {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 4px 7px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .top-ctrl-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
         }
 
         .settings-btn {
             background: rgba(255, 255, 255, 0.15);
             border: none;
             color: white;
-            width: 36px;
-            height: 36px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
-            z-index: 21;
         }
 
-        .settings-btn:active {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Carrossel */
+        /* Área do Carrossel / Grade */
         .carousel-container {
             flex: 1;
-            display: flex;
-            align-items: center;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            padding: 0 30px;
+            overflow: auto;
+            padding: 15px 25px;
             gap: 20px;
             scrollbar-width: none;
+            display: flex;
+            align-content: center;
+            align-items: center;
         }
 
         .carousel-container::-webkit-scrollbar {
             display: none;
+        }
+
+        /* MODO HORIZONTAL (Landscape) */
+        @media (orientation: landscape) {
+            .carousel-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                align-content: center;
+                max-height: calc(100vh - 100px);
+            }
+        }
+
+        /* MODO VERTICAL (Portrait) */
+        @media (orientation: portrait) {
+            .carousel-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+                justify-items: center;
+                align-content: start;
+                max-height: calc(100vh - 110px);
+                gap: 15px;
+                padding-top: 10px;
+            }
         }
 
         .game-card {
@@ -115,7 +152,7 @@
             background-color: #111;
             border: 3px solid transparent;
             transition: transform 0.2s ease, border-color 0.2s ease;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.6);
             position: relative;
             cursor: pointer;
         }
@@ -128,9 +165,9 @@
         }
 
         .game-card.selected {
-            transform: scale(1.1) translateY(-4px);
+            transform: scale(1.08) translateY(-3px);
             border-color: var(--select-color);
-            box-shadow: 0 12px 30px rgba(255, 255, 255, 0.25);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.25);
             z-index: 5;
         }
 
@@ -140,14 +177,23 @@
             right: 6px;
             background: rgba(0, 0, 0, 0.85);
             color: #fff;
-            font-size: 9px;
+            font-size: 8px;
             font-weight: bold;
-            padding: 3px 6px;
+            padding: 3px 5px;
             border-radius: 4px;
             text-transform: uppercase;
         }
 
-        /* Card de Adicionar Jogo */
+        .favorite-badge {
+            position: absolute;
+            bottom: 6px;
+            left: 6px;
+            font-size: 13px;
+            z-index: 2;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.9));
+        }
+
+        /* Card de Adicionar Jogo (+) */
         .add-card {
             flex: 0 0 auto;
             width: var(--card-width);
@@ -159,7 +205,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             cursor: pointer;
             transition: transform 0.2s, border-color 0.2s;
         }
@@ -170,16 +216,8 @@
             background: rgba(255, 255, 255, 0.12);
         }
 
-        .add-icon {
-            font-size: 48px;
-            color: #aaa;
-        }
-
-        .add-text {
-            font-size: 13px;
-            color: #aaa;
-            font-weight: bold;
-        }
+        .add-icon { font-size: 42px; color: #aaa; }
+        .add-text { font-size: 12px; color: #aaa; font-weight: bold; }
 
         /* Rodapé */
         .bottom-bar {
@@ -187,20 +225,21 @@
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
-            gap: 12px 20px;
-            padding: 10px 15px;
-            font-size: 12px;
+            gap: 8px 16px;
+            padding: 8px 12px;
+            font-size: 11px;
             color: #aaaaaa;
             background: linear-gradient(to top, rgba(0,0,0,0.98), transparent);
             z-index: 10;
+            min-height: 45px;
         }
 
         .button-hint {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-radius: 6px;
         }
 
@@ -208,11 +247,11 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 9px;
             color: #000;
         }
 
@@ -220,52 +259,46 @@
         .btn-b { background-color: #FF3B30; color: #fff; }
         .btn-x { background-color: #007AFF; color: #fff; }
         .btn-y { background-color: #FFCC00; }
+        .btn-select { background-color: #AF52DE; color: #fff; }
+        .btn-start { background-color: #FF9500; color: #fff; }
 
         /* Modais */
         .modal {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0,0,0,0.85);
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.88);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 100;
         }
-
-        .modal.active {
-            display: flex;
-        }
+        .modal.active { display: flex; }
 
         .modal-content {
             background: #161618;
             border: 1px solid #333;
-            padding: 20px;
+            padding: 18px;
             border-radius: 12px;
             width: 90%;
-            max-width: 420px;
+            max-width: 440px;
             max-height: 85vh;
             overflow-y: auto;
             text-align: center;
         }
 
-        .modal-content h2 {
-            margin-bottom: 12px;
-            font-size: 18px;
-        }
+        .modal-content h2 { margin-bottom: 10px; font-size: 17px; }
 
         .settings-group {
             text-align: left;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             padding: 10px;
             background: rgba(255,255,255,0.03);
             border-radius: 8px;
         }
 
         .settings-group h3 {
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
             margin-bottom: 6px;
             text-transform: uppercase;
@@ -274,7 +307,7 @@
         .input-row {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
             margin-bottom: 8px;
         }
 
@@ -282,22 +315,18 @@
             background: #222;
             border: 1px solid #444;
             color: white;
-            padding: 8px;
+            padding: 7px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
         }
 
-        .input-row label {
-            font-size: 11px;
-            color: #aaa;
-        }
+        .input-row label { font-size: 11px; color: #aaa; }
 
         .cover-tools {
             display: flex;
             gap: 6px;
             margin-top: 4px;
         }
-
         .cover-tools button {
             flex: 1;
             background: #2b2b2b;
@@ -309,42 +338,45 @@
             cursor: pointer;
         }
 
-        .search-results {
-            max-height: 150px;
+        .search-results, .platform-list {
+            max-height: 130px;
             overflow-y: auto;
-            margin-top: 10px;
+            margin-top: 8px;
             text-align: left;
         }
-
-        .search-item {
-            padding: 8px;
+        .search-item, .platform-item {
+            padding: 7px;
             background: #222;
             margin-bottom: 4px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        .search-item:hover, .platform-item:hover { background: #333; }
 
         .modal-actions {
             display: flex;
             gap: 8px;
             justify-content: center;
-            margin-top: 12px;
+            margin-top: 10px;
         }
 
         .modal-btn {
             background: #333;
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 8px 14px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             font-size: 12px;
         }
-
         .modal-btn.primary { background: #007AFF; }
         .modal-btn.danger { background: #FF3B30; }
+        .modal-btn.warning { background: #FF9500; }
     </style>
 </head>
 <body onclick="requestFullscreen()">
@@ -353,7 +385,9 @@
         <div class="game-title" id="gameTitle">Carregando...</div>
         <div class="top-right-group">
             <div class="battery-display" id="batteryLevel">--%</div>
-            <button class="settings-btn" id="settingsBtn" title="Configurações Visuais" onclick="openSettingsModal()">⚙</button>
+            <button class="top-ctrl-btn" onclick="openSelectFilter()">SELECT</button>
+            <button class="top-ctrl-btn" onclick="openStartConfig()">START</button>
+            <button class="settings-btn" id="settingsBtn" title="Configurações" onclick="openModal('settingsModal')">⚙</button>
         </div>
     </div>
 
@@ -363,36 +397,58 @@
     <div class="bottom-bar">
         <div class="button-hint" onclick="handleActionA()"><span class="btn-icon btn-a">A</span> Abrir</div>
         <div class="button-hint" onclick="handleActionB()"><span class="btn-icon btn-b">B</span> Voltar</div>
+        <div class="button-hint" onclick="handleActionSelect()"><span class="btn-icon btn-select">SEL</span> Filtro</div>
+        <div class="button-hint" onclick="handleActionStart()"><span class="btn-icon btn-start">STA</span> Opções</div>
         <div class="button-hint" onclick="handleActionY()"><span class="btn-icon btn-y">Y</span> Pesquisar</div>
         <div class="button-hint" onclick="handleActionX()"><span class="btn-icon btn-x">X</span> Aleatório</div>
     </div>
 
-    <!-- Modal Configurações Visuais (⚙) -->
+    <!-- Modal Configurações Gerais -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2>Configurações Visuais</h2>
+            <h2>Configurações do Nexus v0.12</h2>
+            
             <div class="settings-group">
-                <h3>Ajustes da Interface</h3>
+                <h3>Visual e Dimensões</h3>
                 <div class="input-row">
-                    <label>Tamanho das Capas: <span id="sizeVal">180</span>px</label>
-                    <input type="range" id="cardWidthRange" min="120" max="260" value="180" oninput="updateCardSize(this.value)">
+                    <label>Tamanho/Largura das Capas: <span id="sizeVal">180</span>px</label>
+                    <input type="range" id="cardWidthRange" min="90" max="240" value="180" oninput="updateCardSize(this.value)">
                 </div>
                 <div class="input-row">
-                    <label>Arredondamento dos Cantos:</label>
+                    <label>Cantos:</label>
                     <select id="cardRadiusSelect" onchange="updateCardRadius(this.value)">
-                        <option value="0px">Cantos Retos (0px)</option>
-                        <option value="10px" selected>Arredondado Padrão (10px)</option>
+                        <option value="0px">Retos (0px)</option>
+                        <option value="10px" selected>Arredondado (10px)</option>
                         <option value="20px">Super Arredondado (20px)</option>
-                        <option value="50%circular">Circular / Círculo</option>
+                        <option value="50%circular">Circular</option>
                     </select>
                 </div>
                 <div class="input-row">
-                    <label>Cor da Margem de Seleção:</label>
+                    <label>Cor de Seleção:</label>
                     <input type="color" id="selectColorPicker" value="#ffffff" onchange="updateSelectColor(this.value)" style="height: 35px; cursor: pointer;">
                 </div>
             </div>
+
+            <div class="settings-group">
+                <h3>Gerenciar Plataformas</h3>
+                <div class="platform-list" id="platformListContainer"></div>
+                <div class="input-row" style="margin-top: 8px;">
+                    <input type="text" id="newPlatformName" placeholder="Nova Plataforma (ex: Nintendo 64)">
+                    <button type="button" class="modal-btn warning" style="margin-top:4px;" onclick="addNewPlatform()">Adicionar Plataforma</button>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3>Backup e Dados</h3>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="modal-btn primary" style="flex:1;" onclick="exportBackup()">Salvar / Exportar</button>
+                    <button type="button" class="modal-btn warning" style="flex:1;" onclick="document.getElementById('importFile').click()">Importar Backup</button>
+                    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackup(event)">
+                </div>
+            </div>
+
             <div class="modal-actions">
-                <button class="modal-btn primary" onclick="closeModal('settingsModal')">Concluído (B)</button>
+                <button type="button" class="modal-btn" onclick="closeModal('settingsModal')">Fechar (B)</button>
             </div>
         </div>
     </div>
@@ -404,23 +460,24 @@
             <div class="settings-group">
                 <div class="input-row">
                     <input type="text" id="newGameTitle" placeholder="Título (Ex: God Of War II)">
-                    <input type="text" id="newGamePlatform" placeholder="Plataforma (Ex: PS2)">
+                    <select id="newGamePlatform"></select>
+                    <input type="text" id="newGameGenre" placeholder="Gênero (Ex: Ação, RPG, Luta)">
                     <label>URL / Link da Capa:</label>
                     <input type="text" id="newGameCoverUrl" placeholder="https://exemplo.com/capa.jpg">
                     <div class="cover-tools">
                         <button type="button" onclick="searchSteamGrid('newGameTitle')">🔍 SteamGridDB</button>
                         <button type="button" onclick="searchGoogleImages('newGameTitle')">🌐 Google Imagens</button>
                     </div>
-                    <label style="margin-top: 6px;">Emulador / Plataforma:</label>
+                    <label style="margin-top: 6px;">Emulador de Execução:</label>
                     <select id="newGameExecType">
-                        <option value="aethersx2">AetherSX2</option>
-                        <option value="snes9x">Snes9x EX+</option>
-                        <option value="pizzaboy">Pizza Boy</option>
-                        <option value="ppsspp">PPSSPP</option>
-                        <option value="vita3k">Vita3K+</option>
-                        <option value="dolphin">Dolphin Emulator</option>
-                        <option value="eden">Eden Legacy (Nintendo Switch)</option>
-                        <option value="gamehub">Gamehub (Jogos de PC)</option>
+                        <option value="aethersx2">AetherSX2 (PS2)</option>
+                        <option value="snes9x">Snes9x EX+ (SNES)</option>
+                        <option value="pizzaboy">Pizza Boy (GBA)</option>
+                        <option value="ppsspp">PPSSPP (PSP)</option>
+                        <option value="vita3k">Vita3K+ (PS Vita)</option>
+                        <option value="dolphin">Dolphin (GC/Wii)</option>
+                        <option value="eden">Eden Legacy (Switch)</option>
+                        <option value="gamehub">Gamehub (PC)</option>
                         <option value="native">Outro App / Nativo</option>
                     </select>
                 </div>
@@ -432,30 +489,36 @@
         </div>
     </div>
 
-    <!-- Modal Configurar / Excluir Jogo Existente -->
+    <!-- Modal Configurar / Excluir Jogo -->
     <div class="modal" id="gameConfigModal">
         <div class="modal-content">
             <h2 id="editGameTitleModal">Configurar Jogo</h2>
             <div class="settings-group">
                 <div class="input-row">
+                    <select id="editGamePlatform"></select>
+                    <input type="text" id="editGameGenre" placeholder="Gênero">
                     <label>URL da Capa:</label>
                     <input type="text" id="editGameCoverUrl" placeholder="https://...">
                     <div class="cover-tools">
                         <button type="button" onclick="searchSteamGridEdit()">🔍 SteamGridDB</button>
                         <button type="button" onclick="searchGoogleEdit()">🌐 Google Imagens</button>
                     </div>
-                    <label style="margin-top: 6px;">Emulador / Plataforma:</label>
+                    <label style="margin-top: 6px;">Emulador:</label>
                     <select id="editGameExecType">
-                        <option value="aethersx2">AetherSX2</option>
-                        <option value="snes9x">Snes9x EX+</option>
-                        <option value="pizzaboy">Pizza Boy</option>
-                        <option value="ppsspp">PPSSPP</option>
-                        <option value="vita3k">Vita3K+</option>
-                        <option value="dolphin">Dolphin Emulator</option>
-                        <option value="eden">Eden Legacy (Nintendo Switch)</option>
-                        <option value="gamehub">Gamehub (Jogos de PC)</option>
+                        <option value="aethersx2">AetherSX2 (PS2)</option>
+                        <option value="snes9x">Snes9x EX+ (SNES)</option>
+                        <option value="pizzaboy">Pizza Boy (GBA)</option>
+                        <option value="ppsspp">PPSSPP (PSP)</option>
+                        <option value="vita3k">Vita3K+ (PS Vita)</option>
+                        <option value="dolphin">Dolphin (GC/Wii)</option>
+                        <option value="eden">Eden Legacy (Switch)</option>
+                        <option value="gamehub">Gamehub (PC)</option>
                         <option value="native">Outro App / Nativo</option>
                     </select>
+                    <div class="input-row" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 6px;">
+                        <input type="checkbox" id="editGameFavorite" style="width: 18px; height: 18px; cursor: pointer;">
+                        <label for="editGameFavorite" style="font-size: 13px; color: #fff; cursor: pointer;">Marcar como Jogo Favorito ⭐</label>
+                    </div>
                 </div>
                 <button type="button" class="modal-btn primary" style="width: 100%; margin-top: 5px;" onclick="saveGameConfig()">Salvar Alterações</button>
                 <button type="button" class="modal-btn danger" style="width: 100%; margin-top: 8px;" onclick="deleteCurrentGame()">Apagar Jogo</button>
@@ -466,352 +529,10 @@
         </div>
     </div>
 
-    <!-- Modal Pesquisa (Y) -->
-    <div class="modal" id="searchModal">
+    <!-- Modal de Filtros (Select) -->
+    <div class="modal" id="filterModal">
         <div class="modal-content">
-            <h2>Pesquisar Jogo</h2>
+            <h2>Filtrar Biblioteca</h2>
             <div class="settings-group">
-                <div class="input-row">
-                    <input type="text" id="searchInput" placeholder="Digite o nome do jogo..." oninput="filterSearch()">
-                </div>
-                <div class="search-results" id="searchResults"></div>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="modal-btn" onclick="closeModal('searchModal')">Fechar (B)</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let games = [];
-        let currentIndex = 0;
-        let holdTimer = null;
-
-        let visualPrefs = {
-            width: 180,
-            radius: '10px',
-            color: '#ffffff'
-        };
-
-        const carousel = document.getElementById('carousel');
-        const gameTitle = document.getElementById('gameTitle');
-
-        function loadData() {
-            try {
-                const savedGames = localStorage.getItem('nexus_games');
-                if (savedGames) games = JSON.parse(savedGames);
-
-                const savedPrefs = localStorage.getItem('nexus_visual_prefs');
-                if (savedPrefs) visualPrefs = JSON.parse(savedPrefs);
-            } catch(e) {}
-            applyVisualPrefs();
-        }
-
-        function saveData() {
-            try {
-                localStorage.setItem('nexus_games', JSON.stringify(games));
-                localStorage.setItem('nexus_visual_prefs', JSON.stringify(visualPrefs));
-            } catch(e) {}
-        }
-
-        function applyVisualPrefs() {
-            document.documentElement.style.setProperty('--card-width', visualPrefs.width + 'px');
-            document.documentElement.style.setProperty('--card-height', (visualPrefs.width * 1.44) + 'px');
-            
-            let rad = visualPrefs.radius === '50%circular' ? '50%' : visualPrefs.radius;
-            document.documentElement.style.setProperty('--card-radius', rad);
-            document.documentElement.style.setProperty('--select-color', visualPrefs.color);
-
-            if (document.getElementById('cardWidthRange')) document.getElementById('cardWidthRange').value = visualPrefs.width;
-            if (document.getElementById('sizeVal')) document.getElementById('sizeVal').textContent = visualPrefs.width;
-            if (document.getElementById('cardRadiusSelect')) document.getElementById('cardRadiusSelect').value = visualPrefs.radius;
-            if (document.getElementById('selectColorPicker')) document.getElementById('selectColorPicker').value = visualPrefs.color;
-        }
-
-        function updateCardSize(val) {
-            visualPrefs.width = parseInt(val);
-            applyVisualPrefs();
-            saveData();
-        }
-
-        function updateCardRadius(val) {
-            visualPrefs.radius = val;
-            applyVisualPrefs();
-            saveData();
-        }
-
-        function updateSelectColor(val) {
-            visualPrefs.color = val;
-            applyVisualPrefs();
-            saveData();
-        }
-
-        function renderGames() {
-            carousel.innerHTML = '';
-
-            // Card 0: Adicionar Jogo (+)
-            const addCard = document.createElement('div');
-            addCard.className = `add-card ${currentIndex === 0 ? 'selected' : ''}`;
-            addCard.innerHTML = `<div class="add-icon">+</div><div class="add-text">Adicionar Jogo</div>`;
-            addCard.onclick = () => {
-                currentIndex = 0;
-                updateSelection();
-                openModal('addGameModal');
-            };
-            carousel.appendChild(addCard);
-
-            // Jogos Cadastrados
-            games.forEach((game, index) => {
-                const cardIndex = index + 1;
-                const card = document.createElement('div');
-                card.className = `game-card ${cardIndex === currentIndex ? 'selected' : ''}`;
-                card.innerHTML = `
-                    <img src="${game.cover || ''}" alt="${game.title}">
-                    <div class="platform-badge">${game.platform}</div>
-                `;
-
-                card.onclick = () => {
-                    currentIndex = cardIndex;
-                    updateSelection();
-                };
-
-                card.oncontextmenu = (e) => {
-                    e.preventDefault();
-                    openGameConfig(index);
-                };
-
-                let pTimer;
-                card.ontouchstart = () => {
-                    pTimer = setTimeout(() => openGameConfig(index), 700);
-                };
-                card.ontouchend = () => clearTimeout(pTimer);
-
-                carousel.appendChild(card);
-            });
-
-            updateSelection();
-        }
-
-        function updateSelection() {
-            const cards = carousel.querySelectorAll('.add-card, .game-card');
-            cards.forEach((card, index) => {
-                if (index === currentIndex) {
-                    card.classList.add('selected');
-                    card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
-
-            if (currentIndex === 0) {
-                gameTitle.textContent = "Adicionar Novo Jogo";
-            } else if (games[currentIndex - 1]) {
-                gameTitle.textContent = games[currentIndex - 1].title;
-            }
-        }
-
-        function addNewGame() {
-            const title = document.getElementById('newGameTitle').value.trim();
-            const platform = document.getElementById('newGamePlatform').value.trim();
-            const url = document.getElementById('newGameCoverUrl').value.trim();
-            const execType = document.getElementById('newGameExecType').value;
-
-            if (!title || !platform) {
-                alert("Por favor, informe ao menos o Título e a Plataforma.");
-                return;
-            }
-
-            games.push({ title, platform, cover: url, execType });
-            saveData();
-            currentIndex = games.length;
-            renderGames();
-            closeModal('addGameModal');
-
-            document.getElementById('newGameTitle').value = '';
-            document.getElementById('newGamePlatform').value = '';
-            document.getElementById('newGameCoverUrl').value = '';
-        }
-
-        function openGameConfig(index) {
-            currentIndex = index + 1;
-            const game = games[index];
-            document.getElementById('editGameTitleModal').textContent = `Configurar: ${game.title}`;
-            document.getElementById('editGameCoverUrl').value = game.cover || '';
-            document.getElementById('editGameExecType').value = game.execType || 'aethersx2';
-            openModal('gameConfigModal');
-        }
-
-        function saveGameConfig() {
-            const gIndex = currentIndex - 1;
-            if (games[gIndex]) {
-                games[gIndex].cover = document.getElementById('editGameCoverUrl').value.trim();
-                games[gIndex].execType = document.getElementById('editGameExecType').value;
-                saveData();
-                renderGames();
-            }
-            closeModal('gameConfigModal');
-        }
-
-        function deleteCurrentGame() {
-            const gIndex = currentIndex - 1;
-            if (confirm("Deseja apagar este jogo?")) {
-                games.splice(gIndex, 1);
-                currentIndex = 0;
-                saveData();
-                renderGames();
-                closeModal('gameConfigModal');
-            }
-        }
-
-        function launchGame() {
-            if (currentIndex === 0 || games.length === 0) {
-                openModal('addGameModal');
-                return;
-            }
-            const game = games[currentIndex - 1];
-            const emus = {
-                'aethersx2': 'AetherSX2 (PS2)',
-                'snes9x': 'Snes9x EX+ (SNES)',
-                'pizzaboy': 'Pizza Boy',
-                'ppsspp': 'PPSSPP (PSP)',
-                'vita3k': 'Vita3K+',
-                'dolphin': 'Dolphin Emulator',
-                'eden': 'Eden Legacy (Switch)',
-                'gamehub': 'Gamehub (PC)',
-                'native': 'App Nativo'
-            };
-            alert(`Iniciando ${game.title}\nPlataforma: ${emus[game.execType] || 'Emulador'}`);
-        }
-
-        /* Buscas de Capas */
-        function searchSteamGrid(inputId) {
-            const val = document.getElementById(inputId).value.trim();
-            window.open(`https://www.steamgriddb.com/search/grids?term=${encodeURIComponent(val)}`, '_blank');
-        }
-
-        function searchGoogleImages(inputId) {
-            const val = document.getElementById(inputId).value.trim();
-            window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(val + ' cover png')}`, '_blank');
-        }
-
-        function searchSteamGridEdit() {
-            if (games[currentIndex - 1]) searchSteamGridTitle(games[currentIndex - 1].title);
-        }
-
-        function searchGoogleEdit() {
-            if (games[currentIndex - 1]) searchGoogleImagesTitle(games[currentIndex - 1].title);
-        }
-
-        function searchSteamGridTitle(t) { window.open(`https://www.steamgriddb.com/search/grids?term=${encodeURIComponent(t)}`, '_blank'); }
-        function searchGoogleImagesTitle(t) { window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(t + ' cover png')}`, '_blank'); }
-
-        /* Ações de Controle e Rodapé */
-        function handleActionA() {
-            if (document.querySelector('.modal.active')) return;
-            if (currentIndex === 0) openModal('addGameModal');
-            else launchGame();
-        }
-
-        function handleActionB() {
-            const activeModal = document.querySelector('.modal.active');
-            if (activeModal) activeModal.classList.remove('active');
-        }
-
-        function handleActionY() {
-            if (document.querySelector('.modal.active')) return;
-            openModal('searchModal');
-            document.getElementById('searchInput').value = '';
-            filterSearch();
-        }
-
-        function handleActionX() {
-            if (document.querySelector('.modal.active') || games.length === 0) return;
-            currentIndex = Math.floor(Math.random() * games.length) + 1;
-            updateSelection();
-        }
-
-        function openSettingsModal() { openModal('settingsModal'); }
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-        function filterSearch() {
-            const q = document.getElementById('searchInput').value.toLowerCase();
-            const res = document.getElementById('searchResults');
-            res.innerHTML = '';
-
-            const list = games.map((g, i) => ({ ...g, idx: i + 1 })).filter(g => g.title.toLowerCase().includes(q));
-            if (list.length === 0) {
-                res.innerHTML = '<div style="color:#777; padding:5px;">Nenhum jogo encontrado.</div>';
-                return;
-            }
-
-            list.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'search-item';
-                div.textContent = `${item.title} (${item.platform})`;
-                div.onclick = () => {
-                    currentIndex = item.idx;
-                    updateSelection();
-                    closeModal('searchModal');
-                };
-                res.appendChild(div);
-            });
-        }
-
-        /* Atalhos de Teclado */
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' || e.key === 'b' || e.key === 'B') { handleActionB(); return; }
-            if (document.querySelector('.modal.active')) return;
-
-            const max = games.length;
-            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-                if (currentIndex > 0) { currentIndex--; updateSelection(); }
-            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-                if (currentIndex < max) { currentIndex++; updateSelection(); }
-            } else if (e.key === 'Enter' || e.key === ' ') {
-                handleActionA();
-            } else if (e.key === 'x' || e.key === 'X') {
-                handleActionX();
-            } else if (e.key === 'y' || e.key === 'Y') {
-                handleActionY();
-            }
-        });
-
-        // Segurar A abre configuração
-        window.addEventListener('keydown', (e) => {
-            if ((e.key === 'Enter' || e.key === ' ') && !holdTimer && currentIndex > 0 && !document.querySelector('.modal.active')) {
-                holdTimer = setTimeout(() => openGameConfig(currentIndex - 1), 800);
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-            }
-        });
-
-        function requestFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            }
-        }
-
-        function updateBattery() {
-            const batteryEl = document.getElementById('batteryLevel');
-            if ('getBattery' in navigator) {
-                navigator.getBattery().then(b => {
-                    batteryEl.textContent = `${Math.round(b.level * 100)}%`;
-                    b.addEventListener('levelchange', () => batteryEl.textContent = `${Math.round(b.level * 100)}%`);
-                }).catch(() => batteryEl.textContent = "100%");
-            } else {
-                batteryEl.textContent = "100%";
-            }
-        }
-
-        // Inicialização
-        loadData();
-        renderGames();
-        updateBattery();
-    </script>
-</body>
-</html>
+                <div class="input-row" style="flex-direction: row; align-items: center; gap: 8px; margin-bottom: 10px;">
+                    <input type="checkbox" id="filterFavor
