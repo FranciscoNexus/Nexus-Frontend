@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nexus Frontend</title>
     <style>
+        :root {
+            --card-width: 180px;
+            --card-height: 260px;
+            --card-radius: 10px;
+            --select-color: #ffffff;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -64,9 +71,9 @@
         }
 
         .settings-btn {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.15);
             border: none;
-            color: #555;
+            color: white;
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -74,7 +81,14 @@
             align-items: center;
             justify-content: center;
             font-size: 16px;
-            cursor: default;
+            cursor: pointer;
+            transition: background 0.2s;
+            z-index: 21;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            outline: 2px solid #ffffff;
         }
 
         /* Área Central (Carrossel) */
@@ -93,19 +107,11 @@
             display: none;
         }
 
-        .empty-state {
-            margin: auto;
-            text-align: center;
-            color: #666;
-            font-size: 16px;
-            padding: 20px;
-        }
-
         .game-card {
             flex: 0 0 auto;
-            width: 180px;
-            height: 260px;
-            border-radius: 10px;
+            width: var(--card-width);
+            height: var(--card-height);
+            border-radius: var(--card-radius);
             overflow: hidden;
             background-color: #111;
             border: 3px solid transparent;
@@ -119,12 +125,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            pointer-events: none; /* Impede o menu nativo de imagem do navegador */
+            pointer-events: none;
         }
 
         .game-card.selected {
             transform: scale(1.12) translateY(-6px);
-            border-color: #ffffff;
+            border-color: var(--select-color);
             box-shadow: 0 12px 30px rgba(255, 255, 255, 0.25);
             z-index: 5;
         }
@@ -145,23 +151,23 @@
         /* Cartão de Adicionar Jogo (+) no final do carrossel */
         .add-card {
             flex: 0 0 auto;
-            width: 180px;
-            height: 260px;
-            border-radius: 10px;
+            width: var(--card-width);
+            height: var(--card-height);
+            border-radius: var(--card-radius);
             background-color: rgba(255, 255, 255, 0.05);
-            border: 3px dashed rgba(255, 255, 255, 0.2);
+            border: 3px dashed rgba(255, 255, 255, 0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
         }
 
         .add-card:hover, .add-card.selected {
             background: rgba(255, 255, 255, 0.12);
-            border-color: #ffffff;
+            border-color: var(--select-color);
             transform: scale(1.05);
         }
 
@@ -345,13 +351,13 @@
         <div class="game-title" id="gameTitle">Nenhum Jogo Cadastrado</div>
         <div class="top-right-group">
             <div class="battery-display" id="batteryLevel">--%</div>
-            <button class="settings-btn" id="settingsBtn" title="Futuros Temas">⚙</button>
+            <button class="settings-btn" id="settingsBtn" title="Configurações Visuais" onclick="toggleSettings(true)">⚙</button>
         </div>
     </div>
 
     <div class="carousel-container" id="carousel"></div>
 
-    <!-- Rodapé com Funções Atualizadas -->
+    <!-- Rodapé -->
     <div class="bottom-bar">
         <div class="button-hint" onclick="handleActionA()"><span class="btn-icon btn-a">A</span> Abrir</div>
         <div class="button-hint" onclick="handleActionB()"><span class="btn-icon btn-b">B</span> Voltar</div>
@@ -359,8 +365,38 @@
         <div class="button-hint" onclick="handleActionX()"><span class="btn-icon btn-x">X</span> Aleatório</div>
     </div>
 
-    <!-- Modal Adicionar Jogo -->
+    <!-- Modal de Configurações Visuais e Temas (Engrenagem) -->
     <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h2>Configurações Visuais</h2>
+            <div class="settings-group">
+                <h3>Personalização em Tempo Real</h3>
+                <div class="input-row">
+                    <label>Tamanho das Capas (Largura: <span id="sizeVal">180</span>px):</label>
+                    <input type="range" id="cardWidthRange" min="120" max="260" value="180" oninput="updateCardSize(this.value)">
+                </div>
+                <div class="input-row">
+                    <label>Arredondamento dos Cantos:</label>
+                    <select id="cardRadiusSelect" onchange="updateCardRadius(this.value)">
+                        <option value="0px">Cantos Retos (0px)</option>
+                        <option value="10px" selected>Arredondado Padrão (10px)</option>
+                        <option value="20px">Super Arredondado (20px)</option>
+                        <option value="50%circular">Circular / Círculo</option>
+                    </select>
+                </div>
+                <div class="input-row">
+                    <label>Cor da Margem de Seleção:</label>
+                    <input type="color" id="selectColorPicker" value="#ffffff" onchange="updateSelectColor(this.value)" style="height: 35px; cursor: pointer;">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn primary" onclick="toggleSettings(false)">Concluído (B)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Adicionar Novo Jogo -->
+    <div class="modal" id="addGameModal">
         <div class="modal-content">
             <h2>Adicionar Novo Jogo</h2>
             <div class="settings-group">
@@ -371,7 +407,7 @@
                     <input type="file" id="newGameCoverFile" accept="image/*">
                     <label>OU URL / Link da Capa:</label>
                     <input type="text" id="newGameCoverUrl" placeholder="https://exemplo.com/capa.jpg">
-                    <label>Emulador / Execução:</label>
+                    <label>Emulador / Plataforma de Execução:</label>
                     <select id="newGameExecType">
                         <option value="aethersx2">AetherSX2</option>
                         <option value="snes9x">Snes9x EX+</option>
@@ -379,20 +415,20 @@
                         <option value="ppsspp">PPSSPP</option>
                         <option value="vita3k">Vita3K+</option>
                         <option value="dolphin">Dolphin Emulator</option>
-                        <option value="eden">Eden Legacy</option>
-                        <option value="gamehub">Gamehub</option>
+                        <option value="eden">Eden Legacy (Nintendo Switch)</option>
+                        <option value="gamehub">Gamehub (Jogos de PC)</option>
                         <option value="native">Outro App / Nativo</option>
                     </select>
                 </div>
                 <button class="modal-btn primary" style="width: 100%" onclick="addNewGame()">Salvar Jogo</button>
             </div>
             <div class="modal-actions">
-                <button class="modal-btn" onclick="toggleSettings(false)">Fechar (B)</button>
+                <button class="modal-btn" onclick="toggleAddGame(false)">Fechar (B)</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Configuração Individual do Jogo (Segurar A / Toque Longo) -->
+    <!-- Modal Configuração Individual do Jogo (Segurar A) -->
     <div class="modal" id="gameConfigModal">
         <div class="modal-content">
             <h2 id="editGameTitleModal">Configurar Jogo</h2>
@@ -402,7 +438,7 @@
                     <input type="file" id="editGameCoverFile" accept="image/*">
                     <label>OU URL da Capa:</label>
                     <input type="text" id="editGameCoverUrl" placeholder="https://...">
-                    <label>Emulador / Execução:</label>
+                    <label>Emulador / Plataforma:</label>
                     <select id="editGameExecType">
                         <option value="aethersx2">AetherSX2</option>
                         <option value="snes9x">Snes9x EX+</option>
@@ -410,8 +446,8 @@
                         <option value="ppsspp">PPSSPP</option>
                         <option value="vita3k">Vita3K+</option>
                         <option value="dolphin">Dolphin Emulator</option>
-                        <option value="eden">Eden Legacy</option>
-                        <option value="gamehub">Gamehub</option>
+                        <option value="eden">Eden Legacy (Nintendo Switch)</option>
+                        <option value="gamehub">Gamehub (Jogos de PC)</option>
                         <option value="native">Outro App / Nativo</option>
                     </select>
                 </div>
@@ -492,96 +528,45 @@
         let games = [];
         let currentIndex = 0;
         let isSettingsOpen = false;
+        let isAddGameOpen = false;
         let isGameConfigOpen = false;
         let isSearchOpen = false;
         let holdTimer = null;
 
+        // Preferências Visuais Padrão
+        let visualPrefs = {
+            width: 180,
+            radius: '10px',
+            color: '#ffffff'
+        };
+
         const carousel = document.getElementById('carousel');
         const gameTitle = document.getElementById('gameTitle');
         const settingsModal = document.getElementById('settingsModal');
+        const addGameModal = document.getElementById('addGameModal');
         const gameConfigModal = document.getElementById('gameConfigModal');
         const searchModal = document.getElementById('searchModal');
 
         function loadData() {
             const savedGames = localStorage.getItem('nexus_games');
             if (savedGames) games = JSON.parse(savedGames);
+
+            const savedPrefs = localStorage.getItem('nexus_visual_prefs');
+            if (savedPrefs) {
+                visualPrefs = JSON.parse(savedPrefs);
+                applyVisualPrefs();
+            }
         }
 
         function saveData() {
             localStorage.setItem('nexus_games', JSON.stringify(games));
+            localStorage.setItem('nexus_visual_prefs', JSON.stringify(visualPrefs));
         }
 
-        function renderGames() {
-            carousel.innerHTML = '';
+        function applyVisualPrefs() {
+            document.documentElement.style.setProperty('--card-width', visualPrefs.width + 'px');
+            document.documentElement.style.setProperty('--card-height', (visualPrefs.width * 1.44) + 'px');
             
-            // Renderiza os cartões dos jogos
-            games.forEach((game, index) => {
-                const card = document.createElement('div');
-                card.className = `game-card ${index === currentIndex ? 'selected' : ''}`;
-                card.innerHTML = `
-                    <img src="${game.cover || ''}" alt="${game.title}">
-                    <div class="platform-badge">${game.platform}</div>
-                `;
-                
-                card.onclick = (e) => {
-                    e.stopPropagation();
-                    currentIndex = index;
-                    updateSelection();
-                    saveData();
-                    sfx.play('select');
-                };
-
-                // Substitui o menu padrão de imagem do navegador pelo menu de configuração do jogo
-                card.oncontextmenu = (e) => {
-                    e.preventDefault();
-                    openGameConfig(index);
-                };
-
-                // Suporte a toque longo (long press) para mobile
-                let pressTimer;
-                card.ontouchstart = () => {
-                    pressTimer = setTimeout(() => {
-                        openGameConfig(index);
-                    }, 700);
-                };
-                card.ontouchend = () => {
-                    clearTimeout(pressTimer);
-                };
-
-                carousel.appendChild(card);
-            });
-
-            // Adiciona o cartão (+) no final do carrossel para inserir novos jogos
-            const addCard = document.createElement('div');
-            addCard.className = `add-card ${currentIndex === games.length ? 'selected' : ''}`;
-            addCard.innerHTML = `
-                <div class="add-icon">+</div>
-                <div class="add-text">Adicionar Jogo</div>
-            `;
-            addCard.onclick = (e) => {
-                e.stopPropagation();
-                currentIndex = games.length;
-                updateSelection();
-                toggleSettings(true);
-                sfx.play('select');
-            };
-            carousel.appendChild(addCard);
-
-            updateSelection();
-        }
-
-        function updateSelection() {
-            const cards = carousel.querySelectorAll('.game-card, .add-card');
-            cards.forEach((card, index) => {
-                if (index === currentIndex) {
-                    card.classList.add('selected');
-                    card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
-            if (currentIndex < games.length) {
-                gameTitle.textContent = games[currentIndex].title;
-            } else {
-                gameTitle.textContent = "Adicionar Novo Jogo";
-       
+            let rad = visualPrefs.radius;
+            if (rad === '50%circular') {
+                document.do
