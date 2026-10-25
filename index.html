@@ -111,6 +111,7 @@
             transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 10px 25px rgba(0,0,0,0.6);
             position: relative;
+            cursor: pointer;
         }
 
         .game-card img {
@@ -139,29 +140,40 @@
             text-transform: uppercase;
         }
 
+        /* Barra Inferior Interativa por Toque */
         .bottom-bar {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 25px;
+            gap: 30px;
             padding: 12px;
             font-size: 13px;
             color: #aaaaaa;
             background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            z-index: 10;
         }
 
         .button-hint {
             display: flex;
             align-items: center;
             gap: 6px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .button-hint:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
 
         .btn-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             font-weight: bold;
             font-size: 11px;
@@ -281,11 +293,12 @@
 
     <div class="carousel-container" id="carousel"></div>
 
+    <!-- Barra Inferior com Ações Interativas por Toque -->
     <div class="bottom-bar">
-        <div class="button-hint"><span class="btn-icon btn-a">A</span> Abrir / Segurar (Config)</div>
-        <div class="button-hint"><span class="btn-icon btn-b">B</span> Voltar</div>
-        <div class="button-hint"><span class="btn-icon btn-y">Y</span> Adicionar Jogo</div>
-        <div class="button-hint"><span class="btn-icon btn-x">X</span> Config</div>
+        <div class="button-hint" onclick="handleActionA(event)"><span class="btn-icon btn-a">A</span> Abrir</div>
+        <div class="button-hint" onclick="handleActionB(event)"><span class="btn-icon btn-b">B</span> Voltar</div>
+        <div class="button-hint" onclick="handleActionY(event)"><span class="btn-icon btn-y">Y</span> Adicionar Jogo</div>
+        <div class="button-hint" onclick="handleActionX(event)"><span class="btn-icon btn-x">X</span> Config</div>
     </div>
 
     <!-- Modal Adicionar Jogo -->
@@ -298,7 +311,7 @@
                     <input type="text" id="newGamePlatform" placeholder="Plataforma (Ex: PS2)">
                     <label>Capa (Arquivo do Celular):</label>
                     <input type="file" id="newGameCoverFile" accept="image/*">
-                    <label>OU Cole a URL/Link da Capa (Mais fácil):</label>
+                    <label>OU URL / Link da Capa:</label>
                     <input type="text" id="newGameCoverUrl" placeholder="https://exemplo.com/capa.jpg">
                     <label>Tipo de Execução:</label>
                     <select id="newGameExecType">
@@ -403,7 +416,7 @@
         function renderGames() {
             carousel.innerHTML = '';
             if (games.length === 0) {
-                carousel.innerHTML = '<div class="empty-state">Nenhum jogo cadastrado.<br>Pressione Y ou clique na engrenagem ⚙ para adicionar.</div>';
+                carousel.innerHTML = '<div class="empty-state">Nenhum jogo cadastrado.<br>Toque em "Adicionar Jogo" abaixo ou na engrenagem ⚙.</div>';
                 gameTitle.textContent = "Nenhum Jogo Cadastrado";
                 return;
             }
@@ -422,11 +435,6 @@
                     updateSelection();
                     saveData();
                     sfx.play('select');
-                };
-
-                card.oncontextmenu = (e) => {
-                    e.preventDefault();
-                    openGameConfig(index);
                 };
 
                 carousel.appendChild(card);
@@ -546,44 +554,72 @@
             sfx.play('select');
             
             if (game.execType === 'aethersx2') {
-                // Abre o AetherSX2 no Android com segurança via Intent
                 window.location.href = "intent://#Intent;package=xyz.aethersx2.android;end;";
             } else {
                 alert(`Iniciando app nativo: ${game.title}`);
             }
         }
 
+        // Funções acopladas aos botões da tela e controle
+        function handleActionA(e) {
+            if (e) e.stopPropagation();
+            if (isSettingsOpen || isGameConfigOpen) return;
+            launchGame();
+        }
+
+        function handleActionB(e) {
+            if (e) e.stopPropagation();
+            if (isSettingsOpen) toggleSettings(false);
+            if (isGameConfigOpen) closeGameConfig();
+            sfx.play('back');
+        }
+
+        function handleActionY(e) {
+            if (e) e.stopPropagation();
+            toggleSettings(true);
+        }
+
+        function handleActionX(e) {
+            if (e) e.stopPropagation();
+            if (games.length > 0) {
+                openGameConfig(currentIndex);
+            } else {
+                toggleSettings(true);
+            }
+        }
+
+        // Controle via Teclado e GameSir G8
         window.addEventListener('keydown', (e) => {
             requestFullscreen();
             if (isSettingsOpen || isGameConfigOpen) {
                 if (e.key === 'Escape' || e.key === 'b' || e.key === 'B') {
-                    toggleSettings(false);
-                    closeGameConfig();
+                    handleActionB();
                 }
                 return;
             }
 
-            if (e.key === 'ArrowLeft' || e.key === 'a') {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
                 if (games.length > 0 && currentIndex > 0) {
                     currentIndex--;
                     updateSelection();
                     sfx.play('nav');
                 }
-            } else if (e.key === 'ArrowRight' || e.key === 'd') {
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
                 if (games.length > 0 && currentIndex < games.length - 1) {
                     currentIndex++;
                     updateSelection();
                     sfx.play('nav');
                 }
             } else if (e.key === 'Enter' || e.key === ' ') {
-                launchGame();
-            } else if (e.key === 'x' || e.key === 'X') preferir
-                toggleSettings(true);
+                handleActionA();
+            } else if (e.key === 'x' || e.key === 'X') {
+                handleActionX();
             } else if (e.key === 'y' || e.key === 'Y') {
-                toggleSettings(true);
+                handleActionY();
             }
         });
 
+        // Segurar A abre as configurações do jogo selecionado
         window.addEventListener('keydown', (e) => {
             if ((e.key === 'Enter' || e.key === ' ') && !holdTimer && games.length > 0 && !isSettingsOpen && !isGameConfigOpen) {
                 holdTimer = setTimeout(() => {
