@@ -1,15 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexus Frontend</title>
-  <style>
-
-  </style>
-</head>
-<body>
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -25,7 +14,7 @@
         }
 
         body {
-            background-color: #000000; /* Preto OLED Puro */
+            background-color: #000000;
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             width: 100vw;
@@ -39,7 +28,6 @@
             left: 0;
         }
 
-        /* Barra Superior */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -90,7 +78,6 @@
             outline: 2px solid #ffffff;
         }
 
-        /* Área Central (Carrossel de Jogos) */
         .carousel-container {
             flex: 1;
             display: flex;
@@ -152,7 +139,6 @@
             text-transform: uppercase;
         }
 
-        /* Barra Inferior (Legenda de Botões) */
         .bottom-bar {
             display: flex;
             justify-content: center;
@@ -187,7 +173,6 @@
         .btn-x { background-color: #007AFF; color: #fff; }
         .btn-y { background-color: #FFCC00; }
 
-        /* Modal */
         .modal {
             position: fixed;
             top: 0;
@@ -249,7 +234,7 @@
             background: #222;
             border: 1px solid #444;
             color: white;
-            padding: 8px;
+            padding: 10px;
             border-radius: 6px;
             font-size: 14px;
         }
@@ -270,7 +255,7 @@
             background: #333;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 18px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
@@ -303,54 +288,49 @@
         <div class="button-hint"><span class="btn-icon btn-x">X</span> Config</div>
     </div>
 
-    <!-- Modal Principal de Configurações / Adicionar -->
+    <!-- Modal Adicionar Jogo -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2>Gerenciar Nexus</h2>
-            
+            <h2>Adicionar Novo Jogo</h2>
             <div class="settings-group">
-                <h3>Adicionar Novo Jogo</h3>
                 <div class="input-row">
-                    <input type="text" id="newGameTitle" placeholder="Título do Jogo">
-                    <input type="text" id="newGamePlatform" placeholder="Plataforma (Ex: PS2, Android, Switch)">
-                    <label>Capa do Jogo (Arquivo do Celular):</label>
+                    <input type="text" id="newGameTitle" placeholder="Título (Ex: God Of War II)">
+                    <input type="text" id="newGamePlatform" placeholder="Plataforma (Ex: PS2)">
+                    <label>Capa do Jogo (Galeria do Celular):</label>
                     <input type="file" id="newGameCoverFile" accept="image/*">
                     <label>Tipo de Execução:</label>
                     <select id="newGameExecType">
-                        <option value="native">App Nativo / URI Scheme</option>
-                        <option value="recompiled">Jogo Recompilado</option>
-                        <option value="emulator">Emulador (Passar ROM)</option>
+                        <option value="aethersx2">AetherSX2 (PS2)</option>
+                        <option value="native">App Nativo / Outro Emulador</option>
                     </select>
-                    <input type="text" id="newGameExecPath" placeholder="Caminho / Pacote (Ex: com.dolphin.emu ou intent://...)">
+                    <input type="text" id="newGameExecPath" placeholder="Nome do pacote ou URI (Ex: xyz.aethersx2.android)">
                 </div>
-                <button class="modal-btn primary" style="width: 100%" onclick="addNewGame()">Salvar Jogo na Biblioteca</button>
+                <button class="modal-btn primary" style="width: 100%" onclick="addNewGame()">Salvar Jogo</button>
             </div>
-
             <div class="modal-actions">
                 <button class="modal-btn" onclick="toggleSettings(false)">Fechar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Configuração Individual do Jogo (Segurar A ou Clique Longo) -->
+    <!-- Modal Configuração Individual -->
     <div class="modal" id="gameConfigModal">
         <div class="modal-content">
             <h2 id="editGameTitleModal">Configurar Jogo</h2>
             <div class="settings-group">
                 <div class="input-row">
-                    <label>Alterar Capa (Opcional):</label>
+                    <label>Alterar Capa:</label>
                     <input type="file" id="editGameCoverFile" accept="image/*">
                     <label>Tipo de Execução:</label>
                     <select id="editGameExecType">
-                        <option value="native">App Nativo / URI Scheme</option>
-                        <option value="recompiled">Jogo Recompilado</option>
-                        <option value="emulator">Emulador (Passar ROM)</option>
+                        <option value="aethersx2">AetherSX2 (PS2)</option>
+                        <option value="native">App Nativo / Outro</option>
                     </select>
-                    <label>Caminho / Pacote de Execução:</label>
-                    <input type="text" id="editGameExecPath" placeholder="Ex: com.epsxe.ePSXe ou caminho da ROM">
+                    <label>Pacote do Emulador / App:</label>
+                    <input type="text" id="editGameExecPath" placeholder="Ex: xyz.aethersx2.android">
                 </div>
                 <button class="modal-btn primary" style="width: 100%" onclick="saveGameConfig()">Salvar Alterações</button>
-                <button class="modal-btn danger" style="width: 100%; margin-top: 10px;" onclick="deleteCurrentGame()">Remover Jogo da Biblioteca</button>
+                <button class="modal-btn danger" style="width: 100%; margin-top: 10px;" onclick="deleteCurrentGame()">Remover Jogo</button>
             </div>
             <div class="modal-actions">
                 <button class="modal-btn" onclick="closeGameConfig()">Cancelar</button>
@@ -412,11 +392,7 @@
 
         function loadData() {
             const savedGames = localStorage.getItem('nexus_games');
-            if (savedGames) {
-                games = JSON.parse(savedGames);
-            } else {
-                games = []; // Home limpa por padrão
-            }
+            if (savedGames) games = JSON.parse(savedGames);
         }
 
         function saveData() {
@@ -426,7 +402,7 @@
         function renderGames() {
             carousel.innerHTML = '';
             if (games.length === 0) {
-                carousel.innerHTML = '<div class="empty-state">Nenhum jogo na biblioteca.<br>Pressione Y ou clique na engrenagem ⚙ para adicionar.</div>';
+                carousel.innerHTML = '<div class="empty-state">Nenhum jogo cadastrado.<br>Pressione Y ou clique na engrenagem ⚙ para adicionar.</div>';
                 gameTitle.textContent = "Nenhum Jogo Cadastrado";
                 return;
             }
@@ -439,7 +415,6 @@
                     <div class="platform-badge">${game.platform}</div>
                 `;
                 
-                // Suporte a clique e toque longo para abrir config do jogo
                 card.onclick = (e) => {
                     e.stopPropagation();
                     currentIndex = index;
@@ -474,7 +449,6 @@
             }
         }
 
-        // Converter arquivo de imagem local em Base64 para salvar no armazenamento
         function getBase64(file, callback) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -495,19 +469,12 @@
             }
 
             const processAdd = (coverBase64) => {
-                games.push({
-                    title,
-                    platform,
-                    cover: coverBase64 || '',
-                    execType,
-                    execPath
-                });
+                games.push({ title, platform, cover: coverBase64 || '', execType, execPath });
                 saveData();
                 renderGames();
                 toggleSettings(false);
                 sfx.play('select');
 
-                // Limpar campos
                 document.getElementById('newGameTitle').value = '';
                 document.getElementById('newGamePlatform').value = '';
                 document.getElementById('newGameCoverFile').value = '';
@@ -525,7 +492,7 @@
             currentIndex = index;
             const game = games[currentIndex];
             document.getElementById('editGameTitleModal').textContent = `Configurar: ${game.title}`;
-            document.getElementById('editGameExecType').value = game.execType || 'native';
+            document.getElementById('editGameExecType').value = game.execType || 'aethersx2';
             document.getElementById('editGameExecPath').value = game.execPath || '';
             gameConfigModal.classList.add('active');
             isGameConfigOpen = true;
@@ -549,7 +516,7 @@
                 saveData();
                 renderGames();
                 closeGameConfig();
-                sfx.play('select');
+                    sfx.play('select');
             };
 
             if (fileInput.files && fileInput.files[0]) {
@@ -563,7 +530,7 @@
         }
 
         function deleteCurrentGame() {
-            if (confirm("Deseja realmente remover este jogo da biblioteca?")) {
+            if (confirm("Deseja realmente remover este jogo?")) {
                 games.splice(currentIndex, 1);
                 if (currentIndex >= games.length) currentIndex = Math.max(0, games.length - 1);
                 saveData();
@@ -577,18 +544,19 @@
             const game = games[currentIndex];
             sfx.play('select');
             
-            if (game.execPath) {
-                // Tenta abrir o URI scheme ou caminho configurado
+            if (game.execType === 'aethersx2') {
+                // Tenta disparar o Intent direto para abrir o AetherSX2 no Android
+                // Pacote padrão do AetherSX2: xyz.aethersx2.android
+                window.location.href = "intent://#Intent;package=xyz.aethersx2.android;end;";
+            } else if (game.execPath) {
                 window.location.href = game.execPath;
             } else {
-                alert(`Iniciando (${game.execType || 'Nativo'}): ${game.title}`);
+                alert(`Iniciando: ${game.title}`);
             }
         }
 
-        // Controles por Teclado e GameSir G8
         window.addEventListener('keydown', (e) => {
             requestFullscreen();
-
             if (isSettingsOpen || isGameConfigOpen) {
                 if (e.key === 'Escape' || e.key === 'b' || e.key === 'B') {
                     toggleSettings(false);
@@ -610,7 +578,6 @@
                     sfx.play('nav');
                 }
             } else if (e.key === 'Enter' || e.key === ' ') {
-                // Pressionar A abre o jogo
                 launchGame();
             } else if (e.key === 'x' || e.key === 'X') {
                 toggleSettings(true);
@@ -619,12 +586,11 @@
             }
         });
 
-        // Simular o "Segurar o botão A" no controle para abrir as configurações do jogo selecionado
         window.addEventListener('keydown', (e) => {
             if ((e.key === 'Enter' || e.key === ' ') && !holdTimer && games.length > 0 && !isSettingsOpen && !isGameConfigOpen) {
                 holdTimer = setTimeout(() => {
                     openGameConfig(currentIndex);
-                }, 800); // Segurar por 0.8 segundos abre o menu de config do jogo
+                }, 800);
             }
         });
 
@@ -670,16 +636,9 @@
             toggleSettings(true);
         };
 
-        // Inicialização
         loadData();
         renderGames();
         updateBattery();
     </script>
-</body>
-</html>
-
-  <script>
-
-  </script>
 </body>
 </html>
