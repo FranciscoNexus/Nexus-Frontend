@@ -64,9 +64,9 @@
         }
 
         .settings-btn {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
             border: none;
-            color: white;
+            color: #555;
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -74,17 +74,10 @@
             align-items: center;
             justify-content: center;
             font-size: 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-            z-index: 21;
+            cursor: default;
         }
 
-        .settings-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            outline: 2px solid #ffffff;
-        }
-
-        /* Área Central (Carrossel Proporcional) */
+        /* Área Central (Carrossel) */
         .carousel-container {
             flex: 1;
             display: flex;
@@ -126,6 +119,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            pointer-events: none; /* Impede o menu nativo de imagem do navegador */
         }
 
         .game-card.selected {
@@ -146,6 +140,41 @@
             padding: 3px 6px;
             border-radius: 4px;
             text-transform: uppercase;
+        }
+
+        /* Cartão de Adicionar Jogo (+) no final do carrossel */
+        .add-card {
+            flex: 0 0 auto;
+            width: 180px;
+            height: 260px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 3px dashed rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .add-card:hover, .add-card.selected {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .add-icon {
+            font-size: 48px;
+            font-weight: 300;
+            color: #aaa;
+        }
+
+        .add-text {
+            font-size: 13px;
+            color: #aaa;
+            font-weight: bold;
         }
 
         /* Rodapé Responsivo */
@@ -265,6 +294,26 @@
             color: #aaa;
         }
 
+        .search-results {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        .search-item {
+            padding: 8px;
+            background: #222;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .search-item:hover {
+            background: #333;
+        }
+
         .modal-actions {
             display: flex;
             gap: 8px;
@@ -296,26 +345,25 @@
         <div class="game-title" id="gameTitle">Nenhum Jogo Cadastrado</div>
         <div class="top-right-group">
             <div class="battery-display" id="batteryLevel">--%</div>
-            <button class="settings-btn" id="settingsBtn" title="Configurações">⚙</button>
+            <button class="settings-btn" id="settingsBtn" title="Futuros Temas">⚙</button>
         </div>
     </div>
 
     <div class="carousel-container" id="carousel"></div>
 
-    <!-- Rodapé Interativo -->
+    <!-- Rodapé com Funções Atualizadas -->
     <div class="bottom-bar">
         <div class="button-hint" onclick="handleActionA()"><span class="btn-icon btn-a">A</span> Abrir</div>
         <div class="button-hint" onclick="handleActionB()"><span class="btn-icon btn-b">B</span> Voltar</div>
-        <div class="button-hint" onclick="handleActionY()"><span class="btn-icon btn-y">Y</span> Pesquisar / Adicionar</div>
+        <div class="button-hint" onclick="handleActionY()"><span class="btn-icon btn-y">Y</span> Pesquisar</div>
         <div class="button-hint" onclick="handleActionX()"><span class="btn-icon btn-x">X</span> Aleatório</div>
     </div>
 
-    <!-- Modal Adicionar Jogo (Y / Engrenagem) -->
+    <!-- Modal Adicionar Jogo -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2>Gerenciar Biblioteca</h2>
+            <h2>Adicionar Novo Jogo</h2>
             <div class="settings-group">
-                <h3>Adicionar Novo Jogo</h3>
                 <div class="input-row">
                     <input type="text" id="newGameTitle" placeholder="Título (Ex: God Of War II)">
                     <input type="text" id="newGamePlatform" placeholder="Plataforma (Ex: PS2)">
@@ -323,9 +371,16 @@
                     <input type="file" id="newGameCoverFile" accept="image/*">
                     <label>OU URL / Link da Capa:</label>
                     <input type="text" id="newGameCoverUrl" placeholder="https://exemplo.com/capa.jpg">
-                    <label>Tipo de Execução:</label>
+                    <label>Emulador / Execução:</label>
                     <select id="newGameExecType">
-                        <option value="aethersx2">Abrir AetherSX2 (PS2)</option>
+                        <option value="aethersx2">AetherSX2</option>
+                        <option value="snes9x">Snes9x EX+</option>
+                        <option value="pizzaboy">Pizza Boy</option>
+                        <option value="ppsspp">PPSSPP</option>
+                        <option value="vita3k">Vita3K+</option>
+                        <option value="dolphin">Dolphin Emulator</option>
+                        <option value="eden">Eden Legacy</option>
+                        <option value="gamehub">Gamehub</option>
                         <option value="native">Outro App / Nativo</option>
                     </select>
                 </div>
@@ -337,7 +392,7 @@
         </div>
     </div>
 
-    <!-- Modal Configuração Individual do Jogo -->
+    <!-- Modal Configuração Individual do Jogo (Segurar A / Toque Longo) -->
     <div class="modal" id="gameConfigModal">
         <div class="modal-content">
             <h2 id="editGameTitleModal">Configurar Jogo</h2>
@@ -347,9 +402,16 @@
                     <input type="file" id="editGameCoverFile" accept="image/*">
                     <label>OU URL da Capa:</label>
                     <input type="text" id="editGameCoverUrl" placeholder="https://...">
-                    <label>Tipo de Execução:</label>
+                    <label>Emulador / Execução:</label>
                     <select id="editGameExecType">
-                        <option value="aethersx2">Abrir AetherSX2 (PS2)</option>
+                        <option value="aethersx2">AetherSX2</option>
+                        <option value="snes9x">Snes9x EX+</option>
+                        <option value="pizzaboy">Pizza Boy</option>
+                        <option value="ppsspp">PPSSPP</option>
+                        <option value="vita3k">Vita3K+</option>
+                        <option value="dolphin">Dolphin Emulator</option>
+                        <option value="eden">Eden Legacy</option>
+                        <option value="gamehub">Gamehub</option>
                         <option value="native">Outro App / Nativo</option>
                     </select>
                 </div>
@@ -358,6 +420,22 @@
             </div>
             <div class="modal-actions">
                 <button class="modal-btn" onclick="closeGameConfig()">Cancelar (B)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pesquisa (Botão Y) -->
+    <div class="modal" id="searchModal">
+        <div class="modal-content">
+            <h2>Pesquisar Jogo</h2>
+            <div class="settings-group">
+                <div class="input-row">
+                    <input type="text" id="searchInput" placeholder="Digite o nome do jogo..." oninput="filterSearch()">
+                </div>
+                <div class="search-results" id="searchResults"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn" onclick="toggleSearch(false)">Fechar (B)</button>
             </div>
         </div>
     </div>
@@ -415,12 +493,14 @@
         let currentIndex = 0;
         let isSettingsOpen = false;
         let isGameConfigOpen = false;
+        let isSearchOpen = false;
         let holdTimer = null;
 
         const carousel = document.getElementById('carousel');
         const gameTitle = document.getElementById('gameTitle');
         const settingsModal = document.getElementById('settingsModal');
         const gameConfigModal = document.getElementById('gameConfigModal');
+        const searchModal = document.getElementById('searchModal');
 
         function loadData() {
             const savedGames = localStorage.getItem('nexus_games');
@@ -433,12 +513,8 @@
 
         function renderGames() {
             carousel.innerHTML = '';
-            if (games.length === 0) {
-                carousel.innerHTML = '<div class="empty-state">Nenhum jogo cadastrado.<br>Toque no botão Y abaixo ou na engrenagem ⚙ para adicionar.</div>';
-                gameTitle.textContent = "Nenhum Jogo Cadastrado";
-                return;
-            }
-
+            
+            // Renderiza os cartões dos jogos
             games.forEach((game, index) => {
                 const card = document.createElement('div');
                 card.className = `game-card ${index === currentIndex ? 'selected' : ''}`;
@@ -455,14 +531,47 @@
                     sfx.play('select');
                 };
 
+                // Substitui o menu padrão de imagem do navegador pelo menu de configuração do jogo
+                card.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    openGameConfig(index);
+                };
+
+                // Suporte a toque longo (long press) para mobile
+                let pressTimer;
+                card.ontouchstart = () => {
+                    pressTimer = setTimeout(() => {
+                        openGameConfig(index);
+                    }, 700);
+                };
+                card.ontouchend = () => {
+                    clearTimeout(pressTimer);
+                };
+
                 carousel.appendChild(card);
             });
+
+            // Adiciona o cartão (+) no final do carrossel para inserir novos jogos
+            const addCard = document.createElement('div');
+            addCard.className = `add-card ${currentIndex === games.length ? 'selected' : ''}`;
+            addCard.innerHTML = `
+                <div class="add-icon">+</div>
+                <div class="add-text">Adicionar Jogo</div>
+            `;
+            addCard.onclick = (e) => {
+                e.stopPropagation();
+                currentIndex = games.length;
+                updateSelection();
+                toggleSettings(true);
+                sfx.play('select');
+            };
+            carousel.appendChild(addCard);
+
             updateSelection();
         }
 
         function updateSelection() {
-            if (games.length === 0) return;
-            const cards = carousel.querySelectorAll('.game-card');
+            const cards = carousel.querySelectorAll('.game-card, .add-card');
             cards.forEach((card, index) => {
                 if (index === currentIndex) {
                     card.classList.add('selected');
@@ -471,236 +580,8 @@
                     card.classList.remove('selected');
                 }
             });
-            if (games[currentIndex]) {
+            if (currentIndex < games.length) {
                 gameTitle.textContent = games[currentIndex].title;
-            }
-        }
-
-        function getBase64(file, callback) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => callback(reader.result);
-            reader.onerror = error => console.log('Erro ao ler imagem: ', error);
-        }
-
-        function addNewGame() {
-            const title = document.getElementById('newGameTitle').value;
-            const platform = document.getElementById('newGamePlatform').value;
-            const fileInput = document.getElementById('newGameCoverFile');
-            const urlInput = document.getElementById('newGameCoverUrl').value;
-            const execType = document.getElementById('newGameExecType').value;
-
-            if (!title || !platform) {
-                alert("Preencha ao menos o Título e a Plataforma.");
-                return;
-            }
-
-            const processAdd = (coverData) => {
-                const finalCover = coverData || urlInput || '';
-                games.push({ title, platform, cover: finalCover, execType });
-                saveData();
-                renderGames();
-                toggleSettings(false);
-                sfx.play('select');
-
-                document.getElementById('newGameTitle').value = '';
-                document.getElementById('newGamePlatform').value = '';
-                document.getElementById('newGameCoverFile').value = '';
-                document.getElementById('newGameCoverUrl').value = '';
-            };
-
-            if (fileInput.files && fileInput.files[0]) {
-                getBase64(fileInput.files[0], processAdd);
             } else {
-                processAdd('');
-            }
-        }
-
-        function openGameConfig(index) {
-            currentIndex = index;
-            const game = games[currentIndex];
-            document.getElementById('editGameTitleModal').textContent = `Configurar: ${game.title}`;
-            document.getElementById('editGameExecType').value = game.execType || 'aethersx2';
-            document.getElementById('editGameCoverUrl').value = '';
-            gameConfigModal.classList.add('active');
-            isGameConfigOpen = true;
-            sfx.play('select');
-        }
-
-        function closeGameConfig() {
-            gameConfigModal.classList.remove('active');
-            isGameConfigOpen = false;
-            sfx.play('back');
-        }
-
-        function saveGameConfig() {
-            const fileInput = document.getElementById('editGameCoverFile');
-            const urlInput = document.getElementById('editGameCoverUrl').value;
-            const execType = document.getElementById('editGameExecType').value;
-
-            games[currentIndex].execType = execType;
-
-            const updateAndClose = (coverData) => {
-                if (coverData) games[currentIndex].cover = coverData;
-                else if (urlInput) games[currentIndex].cover = urlInput;
-                
-                saveData();
-                renderGames();
-                closeGameConfig();
-                sfx.play('select');
-            };
-
-            if (fileInput.files && fileInput.files[0]) {
-                getBase64(fileInput.files[0], updateAndClose);
-            } else {
-                updateAndClose(null);
-            }
-        }
-
-        function deleteCurrentGame() {
-            if (confirm("Deseja realmente apagar este jogo da biblioteca?")) {
-                games.splice(currentIndex, 1);
-                if (currentIndex >= games.length) currentIndex = Math.max(0, games.length - 1);
-                saveData();
-                renderGames();
-                closeGameConfig();
-                sfx.play('back');
-            }
-        }
-
-        function launchGame() {
-            if (games.length === 0) return;
-            const game = games[currentIndex];
-            sfx.play('select');
-            
-            if (game.execType === 'aethersx2') {
-                window.location.href = "intent://#Intent;package=xyz.aethersx2.android;end;";
-            } else {
-                alert(`Iniciando app nativo: ${game.title}`);
-            }
-        }
-
-        // Funções dos Botões
-        function handleActionA() {
-            if (isSettingsOpen || isGameConfigOpen) return;
-            launchGame();
-        }
-
-        function handleActionB() {
-            if (isSettingsOpen) {
-                toggleSettings(false);
-                return;
-            }
-            if (isGameConfigOpen) {
-                closeGameConfig();
-                return;
-            }
-            sfx.play('back');
-        }
-
-        function handleActionY() {
-            if (isGameConfigOpen) return;
-            toggleSettings(true);
-        }
-
-        function handleActionX() {
-            if (isSettingsOpen || isGameConfigOpen || games.length === 0) return;
-            currentIndex = Math.floor(Math.random() * games.length);
-            updateSelection();
-            saveData();
-            sfx.play('select');
-        }
-
-        // Eventos de Teclado e GameSir G8
-        window.addEventListener('keydown', (e) => {
-            requestFullscreen();
-
-            if (e.key === 'Escape' || e.key === 'b' || e.key === 'B') {
-                handleActionB();
-                return;
-            }
-
-            if (isSettingsOpen || isGameConfigOpen) return;
-
-            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-                if (games.length > 0 && currentIndex > 0) {
-                    currentIndex--;
-                    updateSelection();
-                    sfx.play('nav');
-                }
-            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-                if (games.length > 0 && currentIndex < games.length - 1) {
-                    currentIndex++;
-                    updateSelection();
-                    sfx.play('nav');
-                }
-            } else if (e.key === 'Enter' || e.key === ' ') {
-                handleActionA();
-            } else if (e.key === 'x' || e.key === 'X') {
-                handleActionX();
-            } else if (e.key === 'y' || e.key === 'Y') {
-                handleActionY();
-            }
-        });
-
-        // Segurar Botão A abre configurações do jogo
-        window.addEventListener('keydown', (e) => {
-            if ((e.key === 'Enter' || e.key === ' ') && !holdTimer && games.length > 0 && !isSettingsOpen && !isGameConfigOpen) {
-                holdTimer = setTimeout(() => {
-                    openGameConfig(currentIndex);
-                }, 800);
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                if (holdTimer) {
-                    clearTimeout(holdTimer);
-                    holdTimer = null;
-                }
-            }
-        });
-
-        async function updateBattery() {
-            if ('getBattery' in navigator) {
-                try {
-                    const battery = await navigator.getBattery();
-                    function setLevel() {
-                        document.getElementById('batteryLevel').textContent = `${Math.round(battery.level * 100)}%`;
-                    }
-                    setLevel();
-                    battery.addEventListener('levelchange', setLevel);
-                } catch (e) {
-                    document.getElementById('batteryLevel').textContent = "85%";
-                }
-            } else {
-                document.getElementById('batteryLevel').textContent = "85%";
-            }
-        }
-
-        function toggleSettings(open) {
-            isSettingsOpen = open;
-            if (open) {
-                settingsModal.classList.add('active');
-                sfx.play('select');
-            } else {
-                settingsModal.classList.remove('active');
-                sfx.play('back');
-            }
-        }
-
-        // Conexão direta e segura do botão da engrenagem com o modal
-        const settingsBtn = document.getElementById('settingsBtn');
-        if (settingsBtn) {
-            settingsBtn.onclick = (e) => {
-                e.stopPropagation();
-                toggleSettings(true);
-            };
-        }
-
-        loadData();
-        renderGames();
-        updateBattery();
-    </script>
-</body>
-</html>
+                gameTitle.textContent = "Adicionar Novo Jogo";
+       
