@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.17 Alpha</title>
+    <title>Nexus Frontend v0.18 Alpha</title>
     <style>
         :root {
             --cw-p: 150px;
@@ -345,7 +345,7 @@
         .btn-x { background-color: #007AFF; color: #fff; }
         .btn-y { background-color: #FFCC00; }
 
-        /* Modais Compactos */
+        /* Modais Responsivos (Sem Estouro nas Bordas) */
         .modal {
             position: fixed;
             top: 0; left: 0;
@@ -362,11 +362,13 @@
             background: #161618;
             border: 1px solid #333;
             padding: 12px 16px;
-            border-radius: 10px;
+            border-radius: 12px;
             width: 92%;
-            max-width: 420px;
+            max-width: 440px;
+            max-height: 88vh;
+            overflow-y: auto;
             text-align: center;
-            overflow: hidden;
+            box-sizing: border-box;
         }
 
         .modal-content h2 { margin-bottom: 8px; font-size: 15px; }
@@ -406,6 +408,7 @@
             padding: 5px;
             border-radius: 4px;
             font-size: 11px;
+            width: 100%;
         }
 
         .input-row label { font-size: 10px; color: #aaa; }
@@ -461,6 +464,18 @@
         .modal-btn.primary { background: #007AFF; }
         .modal-btn.danger { background: #FF3B30; }
         .modal-btn.warning { background: #FF9500; }
+
+        /* Media Query para empilhar em telas estreitas (evita estouro no modo retrato) */
+        @media (max-width: 480px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 10px;
+                max-height: 90vh;
+            }
+        }
     </style>
 </head>
 <body onclick="requestFullscreen()">
@@ -481,7 +496,7 @@
     <!-- Modal Configurações Reformulado -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2 id="settingsModalTitle">Configurações do Nexus v0.17</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.18</h2>
             <div class="settings-grid">
                 <div class="settings-box">
                     <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
@@ -943,7 +958,6 @@
                 } else if (activeSortOrder === 'za') {
                     list.sort((a, b) => b.title.localeCompare(a.title, 'pt-BR', { sensitivity: 'base' }));
                 } else if (activeSortOrder === 'recent') {
-                    // Retorna todos os recentes ordenados, limitado a 10
                     list = list.filter(g => g.lastPlayedTimestamp).sort((a, b) => b.lastPlayedTimestamp - a.lastPlayedTimestamp);
                     return list.slice(0, 10);
                 } else {
@@ -958,7 +972,7 @@
 
             let favorites = list.filter(g => g.isFavorite && !recentIds.has(g.originalIndex));
             favorites.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
-            let favIds = new Set(favorites.app ? favorites.map(g => g.originalIndex) : favorites.map(g => g.originalIndex));
+            let favIds = new Set(favorites.map(g => g.originalIndex));
 
             let others = list.filter(g => !recentIds.has(g.originalIndex) && !favIds.has(g.originalIndex));
             others.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
@@ -979,7 +993,6 @@
                 
                 const starHtml = game.isFavorite ? `<div class="favorite-badge">⭐</div>` : '';
                 const isRecentTop3 = recentTop3Ids.has(game.originalIndex);
-                // Ícone de relógio de parede limpo com ponteiros na cor verde-lima (#4CD964)
                 const recentHtml = isRecentTop3 ? `<div class="recent-badge" style="color: #4CD964;" title="Jogados Recentemente">🕒</div>` : '';
 
                 card.innerHTML = `
@@ -1033,23 +1046,48 @@
             }
         }
 
-        function autoFetchCover() {
+        // Integração real com RAWG API para buscar capas de jogos oficiais
+        async function autoFetchCover() {
             const title = document.getElementById('newGameTitle').value.trim();
             if (!title) {
                 alert("Digite o título do jogo primeiro para buscar a capa.");
                 return;
             }
-            // URL de busca pública otimizada via Open Library / Cover Art Archive / SteamGrid proxy estruturado
-            const validCoverUrl = `https://images.weserv.nl/?url=https://via.placeholder.com/300x420/111111/ffffff?text=${encodeURIComponent(title)}&output=jpg`;
-            document.getElementById('newGameCoverUrl').value = validCoverUrl;
-            alert("Capa gerada e carregada com sucesso!");
+            
+            try {
+                const response = await fetch(`https://api.rawg.io/api/games?key=9c57d74f266249e083c27e85c13e6cf1&search=${encodeURIComponent(title)}`);
+                const data = await response.json();
+                
+                if (data.results && data.results.length > 0 && data.results[0].background_image) {
+                    const coverUrl = data.results[0].background_image;
+                    document.getElementById('newGameCoverUrl').value = coverUrl;
+                    alert(`Capa oficial encontrada para "${data.results[0].name}"!`);
+                } else {
+                    alert("Capa não localizada na base automática. Você pode colar o link do SteamGridDB ou Google.");
+                }
+            } catch (err) {
+                alert("Erro ao conectar com o serviço de capas.");
+            }
         }
 
-        function autoFetchCoverEdit() {
+        async function autoFetchCoverEdit() {
             const title = document.getElementById('editGameTitleModal').textContent.replace('Configurar: ', '').trim();
-            const validCoverUrl = `https://images.weserv.nl/?url=https://via.placeholder.com/300x420/111111/ffffff?text=${encodeURIComponent(title)}&output=jpg`;
-            document.getElementById('editGameCoverUrl').value = validCoverUrl;
-            alert("Capa atualizada com sucesso!");
+            if (!title) return;
+            
+            try {
+                const response = await fetch(`https://api.rawg.io/api/games?key=9c57d74f266249e083c27e85c13e6cf1&search=${encodeURIComponent(title)}`);
+                const data = await response.json();
+                
+                if (data.results && data.results.length > 0 && data.results[0].background_image) {
+                    const coverUrl = data.results[0].background_image;
+                    document.getElementById('editGameCoverUrl').value = coverUrl;
+                    alert(`Capa oficial atualizada para "${data.results[0].name}"!`);
+                } else {
+                    alert("Capa não localizada automaticamente.");
+                }
+            } catch (err) {
+                alert("Erro ao buscar capa.");
+            }
         }
 
         function addNewGame() {
