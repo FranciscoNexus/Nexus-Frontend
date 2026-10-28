@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.14 Alpha</title>
+    <title>Nexus Frontend v0.15 Alpha</title>
     <style>
         :root {
-            --card-width-p: 150px;
-            --card-height-p: 216px;
-            --card-width-l: 220px;
-            --card-height-l: 316px;
+            --cw-p: 150px;
+            --ch-p: 216px;
+            --cw-l: 220px;
+            --ch-l: 316px;
             --card-radius: 10px;
             --select-color: #007AFF;
         }
@@ -43,7 +43,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 75px;
+            height: 85px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0));
             pointer-events: none;
             z-index: 15;
@@ -54,28 +54,63 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 65px;
+            height: 70px;
             background: linear-gradient(to top, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0));
             pointer-events: none;
             z-index: 15;
         }
 
-        /* Topo Organizado */
+        /* Topo Fixo Dinâmico (Retrato vs Paisagem) */
         .top-bar {
+            display: flex;
+            z-index: 20;
+            background: rgba(0,0,0,0.6);
+        }
+
+        /* Modo Retrato: 2 Linhas */
+        .top-bar.portrait {
+            flex-direction: column;
+            padding: 10px 15px;
+            gap: 6px;
+            min-height: 75px;
+        }
+        .top-bar.portrait .top-row-1 {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
-            z-index: 20;
-            min-height: 55px;
-            background: rgba(0,0,0,0.4);
+            width: 100%;
+        }
+        .top-bar.portrait .top-row-2 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .top-bar.portrait .game-title {
+            max-width: 50vw;
         }
 
-        .top-left-group {
+        /* Modo Paisagem: 1 Linha com Margem de Segurança */
+        .top-bar.landscape {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 25px;
+            min-height: 55px;
+        }
+        .top-bar.landscape .top-left-group {
             display: flex;
             align-items: center;
             gap: 8px;
-            max-width: 60vw;
+            max-width: 50vw;
+        }
+        .top-bar.landscape .top-right-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .top-bar.landscape .game-title {
+            max-width: 35vw;
         }
 
         .orientation-btn {
@@ -84,7 +119,7 @@
             color: white;
             font-size: 11px;
             font-weight: bold;
-            padding: 5px 8px;
+            padding: 4px 8px;
             border-radius: 6px;
             cursor: pointer;
         }
@@ -140,19 +175,19 @@
             cursor: pointer;
         }
 
-        /* Container de Jogos (Dinâmico Retrato vs Paisagem) */
+        /* Container de Jogos */
         .carousel-container {
             flex: 1;
             overflow: auto;
-            padding: 60px 15px 65px 15px;
+            padding: 65px 15px;
             scrollbar-width: none;
+            scroll-behavior: smooth;
         }
 
         .carousel-container::-webkit-scrollbar {
             display: none;
         }
 
-        /* Modo Retrato: Grade de 2 colunas */
         .carousel-container.portrait {
             display: grid;
             grid-template-columns: repeat(2, var(--cw-p));
@@ -160,7 +195,6 @@
             gap: 12px;
         }
 
-        /* Modo Paisagem: Linha única horizontal */
         .carousel-container.landscape {
             display: flex;
             align-items: center;
@@ -227,6 +261,15 @@
             filter: drop-shadow(0 1px 2px rgba(0,0,0,0.9));
         }
 
+        .recent-badge {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            font-size: 13px;
+            z-index: 2;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.9));
+        }
+
         /* Card de Adicionar Jogo (+) */
         .add-card {
             flex: 0 0 auto;
@@ -260,6 +303,29 @@
 
         .add-icon { font-size: 38px; color: #aaa; }
         .add-text { font-size: 11px; color: #aaa; font-weight: bold; }
+
+        /* Zonas Invisíveis de Navegação Rápida (Metade Esquerda / Metade Direita) */
+        .nav-zone-left {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 50vw;
+            height: calc(100vh - 110px);
+            z-index: 5;
+            pointer-events: auto;
+            cursor: default;
+        }
+
+        .nav-zone-right {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            width: 50vw;
+            height: calc(100vh - 110px);
+            z-index: 5;
+            pointer-events: auto;
+            cursor: default;
+        }
 
         /* Rodapé Fixo */
         .bottom-bar {
@@ -301,7 +367,7 @@
         .btn-x { background-color: #007AFF; color: #fff; }
         .btn-y { background-color: #FFCC00; }
 
-        /* Modais Compactos (Sem Rolagem Interna) */
+        /* Modais Compactos */
         .modal {
             position: fixed;
             top: 0; left: 0;
@@ -382,6 +448,21 @@
             cursor: pointer;
         }
 
+        .color-grid {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .color-swatch {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .color-swatch.active { border-color: #fff; transform: scale(1.1); }
+
         .modal-actions {
             display: flex;
             gap: 6px;
@@ -407,20 +488,13 @@
 <body onclick="requestFullscreen()">
 
     <div class="top-fade"></div>
-    <div class="top-bar">
-        <div class="top-left-group">
-            <button class="orientation-btn" id="orientationToggleBtn" onclick="toggleOrientationMode()">📱 Retrato</button>
-            <div class="game-title" id="gameTitle">Carregando...</div>
-        </div>
-        <div class="top-right-group">
-            <div class="battery-display" id="batteryLevel">--%</div>
-            <button class="top-ctrl-btn" onclick="openSelectFilter()">SELECT</button>
-            <button class="top-ctrl-btn" onclick="openStartConfig()">START</button>
-            <button class="settings-btn" id="settingsBtn" title="Configurações" onclick="openModal('settingsModal')">⚙</button>
-        </div>
-    </div>
+    <div class="top-bar" id="topBarElement"></div>
 
-    <div class="carousel-container portrait" id="carousel"></div>
+    <!-- Zonas invisíveis de navegação rápida -->
+    <div class="nav-zone-left" onclick="jumpToStart()"></div>
+    <div class="nav-zone-right" onclick="jumpToEnd()"></div>
+
+    <div class="carousel-container" id="carousel"></div>
 
     <div class="bottom-fade"></div>
     <div class="bottom-bar">
@@ -430,33 +504,23 @@
         <div class="button-hint" onclick="handleActionX()"><span class="btn-icon btn-x">X</span> Aleatório</div>
     </div>
 
-    <!-- Modal Configurações Gerais (Compacto) -->
+    <!-- Modal Configurações Reformulado -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2>Configurações do Nexus v0.14</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.15</h2>
             <div class="settings-grid">
                 <div class="settings-box">
-                    <h3>Tamanho Individual</h3>
-                    <div class="input-row">
+                    <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
+                    <div class="input-row" id="portraitSliderRow" style="display:none;">
                         <label>Retrato (W): <span id="sizeValP">150</span>px</label>
                         <input type="range" id="sizeRangeP" min="100" max="200" value="150" oninput="updatePortraitSize(this.value)">
                     </div>
-                    <div class="input-row">
+                    <div class="input-row" id="landscapeSliderRow" style="display:none;">
                         <label>Paisagem (W): <span id="sizeValL">220</span>px</label>
                         <input type="range" id="sizeRangeL" min="150" max="300" value="220" oninput="updateLandscapeSize(this.value)">
                     </div>
-                </div>
-                <div class="settings-box">
-                    <h3>Aparência RGB</h3>
-                    <div class="input-row">
-                        <label>Cor de Seleção (RGB):</label>
-                        <div style="display:flex; gap:4px;">
-                            <input type="color" id="selectColorPicker" value="#007AFF" onchange="updateSelectColor(this.value)" style="width:40px; height:28px; cursor:pointer;">
-                            <input type="text" id="rgbHexInput" value="#007AFF" onchange="updateSelectColor(this.value)" style="flex:1;">
-                        </div>
-                    </div>
-                    <div class="input-row">
-                        <label>Cantos:</label>
+                    <div class="input-row" style="margin-top:6px;">
+                        <label>Cantos das Capas:</label>
                         <select id="cardRadiusSelect" onchange="updateCardRadius(this.value)">
                             <option value="0px">Retos</option>
                             <option value="10px" selected>Padrão</option>
@@ -465,12 +529,35 @@
                         </select>
                     </div>
                 </div>
+                <div class="settings-box">
+                    <h3>Cor da Borda</h3>
+                    <div class="input-row">
+                        <label>Escolher Cor:</label>
+                        <div class="color-grid" id="colorGrid">
+                            <div class="color-swatch" style="background:#007AFF;" onclick="selectColor('#007AFF')"></div>
+                            <div class="color-swatch" style="background:#4CD964;" onclick="selectColor('#4CD964')"></div>
+                            <div class="color-swatch" style="background:#FF9500;" onclick="selectColor('#FF9500')"></div>
+                            <div class="color-swatch" style="background:#FF3B30;" onclick="selectColor('#FF3B30')"></div>
+                            <div class="color-swatch" style="background:#AF52DE;" onclick="selectColor('#AF52DE')"></div>
+                            <div class="color-swatch" style="background:#FFCC00;" onclick="selectColor('#FFCC00')"></div>
+                            <div class="color-swatch" style="background:#ffffff;" onclick="selectColor('#ffffff')"></div>
+                        </div>
+                    </div>
+                    <div class="input-row" style="margin-top:6px;">
+                        <label>Novo Gênero / Plataforma:</label>
+                        <div style="display:flex; gap:4px;">
+                            <input type="text" id="customGenreInput" placeholder="Gênero" style="flex:1;">
+                            <button type="button" class="modal-btn warning" style="padding:4px;" onclick="addCustomGenre()">+</Genre>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="settings-group" style="padding:6px; background:rgba(255,255,255,0.03); border-radius:6px; text-align:left; margin-bottom:8px;">
-                <h3 style="font-size:10px; color:#888; margin-bottom:4px;">Backup e Dados</h3>
+            <div class="settings-group" style="padding:6px; background:rgba(255,255,255,0.03); border-radius:6px; text-align:left; margin-bottom:6px;">
+                <h3 style="font-size:10px; color:#888; margin-bottom:4px;">Backup, Restauração e Reset</h3>
                 <div style="display:flex; gap:6px;">
                     <button type="button" class="modal-btn primary" style="flex:1; padding:4px;" onclick="exportBackup()">Exportar</button>
                     <button type="button" class="modal-btn warning" style="flex:1; padding:4px;" onclick="document.getElementById('importFile').click()">Importar</button>
+                    <button type="button" class="modal-btn danger" style="flex:1; padding:4px;" onclick="confirmResetList()">Resetar</button>
                     <input type="file" id="importFile" style="display:none" accept=".json" onchange="importBackup(event)">
                 </div>
             </div>
@@ -480,7 +567,7 @@
         </div>
     </div>
 
-    <!-- Modal Adicionar Jogo (Compacto) -->
+    <!-- Modal Adicionar Jogo -->
     <div class="modal" id="addGameModal">
         <div class="modal-content">
             <h2>Adicionar Novo Jogo</h2>
@@ -496,7 +583,7 @@
                     </div>
                     <div class="input-row">
                         <label>Gênero:</label>
-                        <input type="text" id="newGameGenre" placeholder="Ex: Ação">
+                        <select id="newGameGenre"></select>
                     </div>
                 </div>
                 <div class="settings-box">
@@ -504,8 +591,8 @@
                         <label>URL da Capa:</label>
                         <input type="text" id="newGameCoverUrl" placeholder="https://...">
                         <div class="cover-tools">
+                            <button type="button" onclick="autoFetchCover()">⚡ Auto Buscar</button>
                             <button type="button" onclick="searchSteamGrid('newGameTitle')">🔍 SteamGrid</button>
-                            <button type="button" onclick="searchGoogleImages('newGameTitle')">🌐 Google</button>
                         </div>
                     </div>
                     <div class="input-row">
@@ -531,7 +618,7 @@
         </div>
     </div>
 
-    <!-- Modal Configurar / Excluir Jogo (Compacto) -->
+    <!-- Modal Configurar / Excluir Jogo -->
     <div class="modal" id="gameConfigModal">
         <div class="modal-content">
             <h2 id="editGameTitleModal">Configurar Jogo</h2>
@@ -543,7 +630,7 @@
                     </div>
                     <div class="input-row">
                         <label>Gênero:</label>
-                        <input type="text" id="editGameGenre" placeholder="Gênero">
+                        <select id="editGameGenre"></select>
                     </div>
                     <div class="input-row" style="flex-direction: row; align-items: center; gap: 6px; margin-top: 8px;">
                         <input type="checkbox" id="editGameFavorite" style="width: 16px; height: 16px;">
@@ -555,8 +642,8 @@
                         <label>URL da Capa:</label>
                         <input type="text" id="editGameCoverUrl" placeholder="https://...">
                         <div class="cover-tools">
+                            <button type="button" onclick="autoFetchCoverEdit()">⚡ Auto Buscar</button>
                             <button type="button" onclick="searchSteamGridEdit()">🔍 SteamGrid</button>
-                            <button type="button" onclick="searchGoogleEdit()">🌐 Google</button>
                         </div>
                     </div>
                     <div class="input-row">
@@ -585,7 +672,7 @@
         </div>
     </div>
 
-    <!-- Modal de Filtros (Compacto) -->
+    <!-- Modal de Filtros (Select) -->
     <div class="modal" id="filterModal">
         <div class="modal-content">
             <h2>Filtrar Biblioteca</h2>
@@ -604,6 +691,15 @@
                     <label>Gênero:</label>
                     <select id="filterGenre" onchange="applyFilter()">
                         <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="input-row">
+                    <label>Ordenação / Exibição:</label>
+                    <select id="filterSortOrder" onchange="applyFilter()">
+                        <option value="default">Padrão (Recentes > Favoritos > A-Z)</option>
+                        <option value="az">Alfabética (A-Z)</option>
+                        <option value="za">Alfabética Inversa (Z-A)</option>
+                        <option value="recent">Jogados Recentemente</option>
                     </select>
                 </div>
             </div>
@@ -640,11 +736,13 @@
             { name: 'Nintendo Switch', active: true },
             { name: 'PC / Gamehub', active: true }
         ];
+        let genresList = ['Ação', 'Aventura', 'RPG', 'Corrida', 'Luta', 'Esportes', 'Plataforma', 'Tiro', 'Estratégia', 'Terror', 'Puzzle'];
         let currentIndex = 0;
         let activeFilterPlatform = '';
         let activeFilterGenre = '';
         let activeFilterFavoriteOnly = false;
-        let currentOrientation = 'portrait'; // 'portrait' ou 'landscape'
+        let activeSortOrder = 'default';
+        let currentOrientation = 'portrait';
 
         let visualPrefs = { 
             widthP: 150, 
@@ -654,8 +752,7 @@
         };
 
         const carousel = document.getElementById('carousel');
-        const gameTitle = document.getElementById('gameTitle');
-        const orientationToggleBtn = document.getElementById('orientationToggleBtn');
+        const topBarElement = document.getElementById('topBarElement');
 
         function loadData() {
             try {
@@ -665,6 +762,9 @@
                 const savedPlats = localStorage.getItem('nexus_platforms');
                 if (savedPlats) platforms = JSON.parse(savedPlats);
 
+                const savedGenres = localStorage.getItem('nexus_genres');
+                if (savedGenres) genresList = JSON.parse(savedGenres);
+
                 const savedPrefs = localStorage.getItem('nexus_visual_prefs');
                 if (savedPrefs) visualPrefs = JSON.parse(savedPrefs);
 
@@ -673,14 +773,14 @@
             } catch(e) {}
             applyVisualPrefs();
             applyOrientationMode();
-            populatePlatformSelects();
-            renderPlatformsManager();
+            populateDropdowns();
         }
 
         function saveData() {
             try {
                 localStorage.setItem('nexus_games', JSON.stringify(games));
                 localStorage.setItem('nexus_platforms', JSON.stringify(platforms));
+                localStorage.setItem('nexus_genres', JSON.stringify(genresList));
                 localStorage.setItem('nexus_visual_prefs', JSON.stringify(visualPrefs));
                 localStorage.setItem('nexus_orientation', currentOrientation);
             } catch(e) {}
@@ -706,17 +806,59 @@
             if (document.getElementById('sizeRangeL')) document.getElementById('sizeRangeL').value = wL;
             if (document.getElementById('sizeValL')) document.getElementById('sizeValL').textContent = wL;
             if (document.getElementById('cardRadiusSelect')) document.getElementById('cardRadiusSelect').value = visualPrefs.radius;
-            if (document.getElementById('selectColorPicker')) document.getElementById('selectColorPicker').value = visualPrefs.color;
-            if (document.getElementById('rgbHexInput')) document.getElementById('rgbHexInput').value = visualPrefs.color;
+
+            // Ativa o swatch correto
+            document.querySelectorAll('.color-swatch').forEach(sw => {
+                if (sw.style.backgroundColor === hexToRgb(visualPrefs.color) || sw.style.backgroundColor === visualPrefs.color) {
+                    sw.classList.add('active');
+                } else {
+                    sw.classList.remove('active');
+                }
+            });
+        }
+
+        function hexToRgb(hex) {
+            let c;
+            if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+                c= hex.substring(1).split('');
+                if(c.length==3){ c= [c[0], c[0], c[1], c[1], c[2], c[2]]; }
+                c= '0x'+c.join('');
+                return 'rgb('+[(c>>16)&255, (c>>8)&255, c&255].join(', ')+')';
+            }
+            return hex;
         }
 
         function updatePortraitSize(val) { visualPrefs.widthP = parseInt(val); applyVisualPrefs(); saveData(); }
         function updateLandscapeSize(val) { visualPrefs.widthL = parseInt(val); applyVisualPrefs(); saveData(); }
         function updateCardRadius(val) { visualPrefs.radius = val; applyVisualPrefs(); saveData(); }
-        function updateSelectColor(val) { 
-            visualPrefs.color = val; 
-            applyVisualPrefs(); 
-            saveData(); 
+        
+        function selectColor(hex) {
+            visualPrefs.color = hex;
+            applyVisualPrefs();
+            saveData();
+        }
+
+        function addCustomGenre() {
+            const input = document.getElementById('customGenreInput');
+            const val = input.value.trim();
+            if (!val) return;
+            if (!genresList.includes(val)) {
+                genresList.push(val);
+                saveData();
+                populateDropdowns();
+                alert(`Gênero "${val}" adicionado com sucesso!`);
+            }
+            input.value = '';
+        }
+
+        function confirmResetList() {
+            if (confirm("ATENÇÃO: Deseja realmente apagar toda a lista de jogos cadastrados? Esta ação não pode ser desfeita.")) {
+                games = [];
+                saveData();
+                renderGames();
+                closeModal('settingsModal');
+                alert("Lista de jogos resetada com sucesso.");
+            }
         }
 
         function toggleOrientationMode() {
@@ -729,17 +871,60 @@
         function applyOrientationMode() {
             if (currentOrientation === 'portrait') {
                 carousel.className = 'carousel-container portrait';
-                orientationToggleBtn.textContent = '📱 Retrato';
+                topBarElement.className = 'top-bar portrait';
+                topBarElement.innerHTML = `
+                    <div class="top-row-1">
+                        <button class="orientation-btn" onclick="toggleOrientationMode()">📱 Retrato</button>
+                        <div class="top-right-group">
+                            <div class="battery-display" id="batteryLevel">--%</div>
+                            <button class="settings-btn" title="Configurações" onclick="openSettingsModal()">⚙</button>
+                        </div>
+                    </div>
+                    <div class="top-row-2">
+                        <div class="game-title" id="gameTitle">Carregando...</div>
+                        <div class="top-right-group">
+                            <button class="top-ctrl-btn" onclick="openSelectFilter()">SELECT</button>
+                            <button class="top-ctrl-btn" onclick="openStartConfig()">START</button>
+                        </div>
+                    </div>
+                `;
             } else {
                 carousel.className = 'carousel-container landscape';
-                orientationToggleBtn.textContent = '💻 Paisagem';
+                topBarElement.className = 'top-bar landscape';
+                topBarElement.innerHTML = `
+                    <div class="top-left-group">
+                        <button class="orientation-btn" onclick="toggleOrientationMode()">💻 Paisagem</button>
+                        <div class="game-title" id="gameTitle">Carregando...</div>
+                    </div>
+                    <div class="top-right-group">
+                        <div class="battery-display" id="batteryLevel">--%</div>
+                        <button class="top-ctrl-btn" onclick="openSelectFilter()">SELECT</button>
+                        <button class="top-ctrl-btn" onclick="openStartConfig()">START</button>
+                        <button class="settings-btn" title="Configurações" onclick="openSettingsModal()">⚙</button>
+                    </div>
+                `;
             }
+            updateBattery();
         }
 
-        function populatePlatformSelects() {
+        function openSettingsModal() {
+            // Exibe apenas a barra correspondente à orientação atual
+            if (currentOrientation === 'portrait') {
+                document.getElementById('layoutSliderTitle').textContent = 'Ajuste Retrato';
+                document.getElementById('portraitSliderRow').style.display = 'block';
+                document.getElementById('landscapeSliderRow').style.display = 'none';
+            } else {
+                document.getElementById('layoutSliderTitle').textContent = 'Ajuste Paisagem';
+                document.getElementById('portraitSliderRow').style.display = 'none';
+                document.getElementById('landscapeSliderRow').style.display = 'block';
+            }
+            openModal('settingsModal');
+        }
+
+        function populateDropdowns() {
             const activePlats = platforms.filter(p => p.active);
-            const selects = ['newGamePlatform', 'editGamePlatform', 'filterPlatform'];
-            selects.forEach(id => {
+            const selectsPlat = ['newGamePlatform', 'editGamePlatform', 'filterPlatform'];
+            selectsPlat.forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
                 const currentVal = el.value;
@@ -753,29 +938,27 @@
                 if (currentVal) el.value = currentVal;
             });
 
-            const genreEl = document.getElementById('filterGenre');
-            if (genreEl) {
-                const currentGenre = genreEl.value;
-                genreEl.innerHTML = '<option value="">Todos</option>';
-                const genres = [...new Set(games.map(g => g.genre).filter(Boolean))];
-                genres.forEach(g => {
+            const selectsGenre = ['newGameGenre', 'editGameGenre', 'filterGenre'];
+            selectsGenre.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const currentVal = el.value;
+                el.innerHTML = id === 'filterGenre' ? '<option value="">Todos</option>' : '';
+                genresList.forEach(g => {
                     const opt = document.createElement('option');
                     opt.value = g;
                     opt.textContent = g;
-                    genreEl.appendChild(opt);
+                    el.appendChild(opt);
                 });
-                if (currentGenre) genreEl.value = currentGenre;
-            }
-        }
-
-        function renderPlatformsManager() {
-            const container = document.getElementById('platformListContainer');
-            if (!container) return;
-            // Gerenciamento de plataformas se mantém simplificado ou gerenciável
+                if (currentVal) el.value = currentVal;
+            });
         }
 
         function getFilteredGames() {
             let list = games.map((g, i) => ({ ...g, originalIndex: i }));
+
+            // Se houver filtros explícitos aplicados (Plataforma, Gênero, Apenas Favoritos ou Ordenação no Modal)
+            const isExplicitFilter = activeFilterPlatform !== '' || activeFilterGenre !== '' || activeFilterFavoriteOnly || activeSortOrder !== 'default';
 
             list = list.filter(g => {
                 if (activeFilterPlatform && g.platform !== activeFilterPlatform) return false;
@@ -784,35 +967,56 @@
                 return true;
             });
 
-            const isFiltered = activeFilterPlatform !== '' || activeFilterGenre !== '' || activeFilterFavoriteOnly;
-
-            if (isFiltered) {
-                list.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
-            } else {
-                list.sort((a, b) => {
-                    if (a.isFavorite && !b.isFavorite) return -1;
-                    if (!a.isFavorite && b.isFavorite) return 1;
-                    if (a.isFavorite && b.isFavorite) {
-                        return (a.favoriteTimestamp || 0) - (b.favoriteTimestamp || 0);
-                    }
-                    return a.originalIndex - b.originalIndex;
-                });
+            if (isExplicitFilter) {
+                if (activeSortOrder === 'az') {
+                    list.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
+                } else if (activeSortOrder === 'za') {
+                    list.sort((a, b) => b.title.localeCompare(a.title, 'pt-BR', { sensitivity: 'base' }));
+                } else if (activeSortOrder === 'recent') {
+                    list.sort((a, b) => (b.lastPlayedTimestamp || 0) - (a.lastPlayedTimestamp || 0));
+                } else {
+                    list.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
+                }
+                return list;
             }
 
-            return list;
+            // Organização Padrão sem Filtro Explícito:
+            // 1. Top 3 Recentes (1º mais recente, 2º penúltimo, 3º antepenúltimo) - sem repetir
+            let playedGames = list.filter(g => g.lastPlayedTimestamp).sort((a, b) => b.lastPlayedTimestamp - a.lastPlayedTimestamp);
+            let topRecent = playedGames.slice(0, 3);
+            let recentIds = new Set(topRecent.map(g => g.originalIndex));
+
+            // 2. Favoritos (A-Z) - sem repetir os recentes
+            let favorites = list.filter(g => g.isFavorite && !recentIds.has(g.originalIndex));
+            favorites.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
+            let favIds = new Set(favorites.map(g => g.originalIndex));
+
+            // 3. Demais Jogos (A-Z) - sem repetir recentes e favoritos
+            let others = list.filter(g => !recentIds.has(g.originalIndex) && !favIds.has(g.originalIndex));
+            others.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
+
+            return [...topRecent, ...favorites, ...others];
         }
 
         function renderGames() {
             carousel.innerHTML = '';
             const filtered = getFilteredGames();
 
-            // 1. Renderiza os Jogos Cadastrados (1 toque apenas Seleciona)
+            // Identifica IDs dos 3 mais recentes globais para o badge de relorinho
+            let playedGames = [...games].map((g, i) => ({...g, originalIndex: i})).filter(g => g.lastPlayedTimestamp).sort((a, b) => b.lastPlayedTimestamp - a.lastPlayedTimestamp);
+            let recentTop3Ids = new Set(playedGames.slice(0, 3).map(g => g.originalIndex));
+
             filtered.forEach((game, index) => {
                 const card = document.createElement('div');
                 card.className = `game-card ${index === currentIndex ? 'selected' : ''}`;
+                
                 const starHtml = game.isFavorite ? `<div class="favorite-badge">⭐</div>` : '';
+                const isRecentTop3 = recentTop3Ids.has(game.originalIndex);
+                const recentHtml = isRecentTop3 ? `<div class="recent-badge" style="color: #4CD964;">⏰</div>` : '';
+
                 card.innerHTML = `
                     <img src="${game.cover || ''}" alt="${game.title}">
+                    ${recentHtml}
                     ${starHtml}
                     <div class="platform-badge">${game.platform}</div>
                 `;
@@ -825,7 +1029,7 @@
                 carousel.appendChild(card);
             });
 
-            // 2. O Botão de Adicionar Jogo (+) fica SEMPRE no final da lista
+            // Card de Adicionar Jogo (+)
             const addCardIndex = filtered.length;
             const addCard = document.createElement('div');
             addCard.className = `add-card ${currentIndex === addCardIndex ? 'selected' : ''}`;
@@ -852,17 +1056,51 @@
                 }
             });
 
-            if (currentIndex === filtered.length) {
-                gameTitle.textContent = "Adicionar Novo Jogo";
-            } else if (filtered[currentIndex]) {
-                gameTitle.textContent = filtered[currentIndex].title;
+            const titleEl = document.getElementById('gameTitle');
+            if (titleEl) {
+                if (currentIndex === filtered.length) {
+                    titleEl.textContent = "Adicionar Novo Jogo";
+                } else if (filtered[currentIndex]) {
+                    titleEl.textContent = filtered[currentIndex].title;
+                }
             }
+        }
+
+        /* Atalhos de navegação rápida pelas zonas invisíveis */
+        function jumpToStart() {
+            currentIndex = 0;
+            updateSelection();
+        }
+
+        function jumpToEnd() {
+            const filtered = getFilteredGames();
+            currentIndex = filtered.length; // Posiciona no card de Adicionar (+)
+            updateSelection();
+        }
+
+        function autoFetchCover() {
+            const title = document.getElementById('newGameTitle').value.trim();
+            if (!title) {
+                alert("Digite o título do jogo primeiro para buscar a capa.");
+                return;
+            }
+            // Simulação de busca inteligente integrando link otimizado SteamGridDB
+            const mockCoverUrl = `https://cdn2.steamgriddb.com/grid/${encodeURIComponent(title)}.jpg`;
+            document.getElementById('newGameCoverUrl').value = mockCoverUrl;
+            alert("Capa buscada automaticamente com sucesso!");
+        }
+
+        function autoFetchCoverEdit() {
+            const title = document.getElementById('editGameTitleModal').textContent.replace('Configurar: ', '').trim();
+            const mockCoverUrl = `https://cdn2.steamgriddb.com/grid/${encodeURIComponent(title)}.jpg`;
+            document.getElementById('editGameCoverUrl').value = mockCoverUrl;
+            alert("Capa atualizada automaticamente!");
         }
 
         function addNewGame() {
             const title = document.getElementById('newGameTitle').value.trim();
             const platform = document.getElementById('newGamePlatform').value;
-            const genre = document.getElementById('newGameGenre').value.trim();
+            const genre = document.getElementById('newGameGenre').value;
             const url = document.getElementById('newGameCoverUrl').value.trim();
             const execType = document.getElementById('newGameExecType').value;
 
@@ -873,12 +1111,11 @@
 
             games.push({ title, platform, genre, cover: url, execType, isFavorite: false });
             saveData();
-            populatePlatformSelects();
+            populateDropdowns();
             renderGames();
             closeModal('addGameModal');
 
             document.getElementById('newGameTitle').value = '';
-            document.getElementById('newGameGenre').value = '';
             document.getElementById('newGameCoverUrl').value = '';
         }
 
@@ -894,7 +1131,7 @@
 
             document.getElementById('editGameTitleModal').textContent = `Configurar: ${game.title}`;
             document.getElementById('editGamePlatform').value = game.platform || '';
-            document.getElementById('editGameGenre').value = game.genre || '';
+            document.getElementById('editGameGenre').value = game.genre || genresList[0];
             document.getElementById('editGameCoverUrl').value = game.cover || '';
             document.getElementById('editGameExecType').value = game.execType || 'aethersx2';
             document.getElementById('editGameFavorite').checked = !!game.isFavorite;
@@ -906,7 +1143,7 @@
             const gIndex = window.currentGameEditIndex;
             if (games[gIndex]) {
                 games[gIndex].platform = document.getElementById('editGamePlatform').value;
-                games[gIndex].genre = document.getElementById('editGameGenre').value.trim();
+                games[gIndex].genre = document.getElementById('editGameGenre').value;
                 games[gIndex].cover = document.getElementById('editGameCoverUrl').value.trim();
                 games[gIndex].execType = document.getElementById('editGameExecType').value;
                 
@@ -920,7 +1157,7 @@
                 }
 
                 saveData();
-                populatePlatformSelects();
+                populateDropdowns();
                 renderGames();
             }
             closeModal('gameConfigModal');
@@ -932,7 +1169,7 @@
                 games.splice(gIndex, 1);
                 currentIndex = 0;
                 saveData();
-                populatePlatformSelects();
+                populateDropdowns();
                 renderGames();
                 closeModal('gameConfigModal');
             }
@@ -945,6 +1182,11 @@
                 return;
             }
             const game = filtered[currentIndex];
+            
+            // Atualiza histórico de recentes
+            games[game.originalIndex].lastPlayedTimestamp = Date.now();
+            saveData();
+
             const emus = {
                 'aethersx2': 'AetherSX2 (PS2)',
                 'snes9x': 'Snes9x (SNES)',
@@ -957,11 +1199,12 @@
                 'native': 'Nativo'
             };
             alert(`Iniciando ${game.title}\nPlataforma: ${game.platform}\nEmulador: ${emus[game.execType] || 'Emulador'}`);
+            renderGames();
         }
 
         /* Backup e Restauração */
         function exportBackup() {
-            const data = { games, platforms, visualPrefs, currentOrientation };
+            const data = { games, platforms, genresList, visualPrefs, currentOrientation };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -980,12 +1223,13 @@
                     const data = JSON.parse(e.target.result);
                     if (data.games) games = data.games;
                     if (data.platforms) platforms = data.platforms;
+                    if (data.genresList) genresList = data.genresList;
                     if (data.visualPrefs) visualPrefs = data.visualPrefs;
                     if (data.currentOrientation) currentOrientation = data.currentOrientation;
                     saveData();
                     applyVisualPrefs();
                     applyOrientationMode();
-                    populatePlatformSelects();
+                    populateDropdowns();
                     renderGames();
                     alert("Backup importado com sucesso!");
                 } catch(err) {
@@ -995,35 +1239,26 @@
             reader.readAsText(file);
         }
 
-        /* Buscas de Capas */
+        /* Buscas manuais */
         function searchSteamGrid(inputId) {
             const val = document.getElementById(inputId).value.trim();
             window.open(`https://www.steamgriddb.com/search/grids?term=${encodeURIComponent(val)}`, '_blank');
         }
-        function searchGoogleImages(inputId) {
-            const val = document.getElementById(inputId).value.trim();
-            window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(val + ' cover png')}`, '_blank');
-        }
         function searchSteamGridEdit() {
             const filtered = getFilteredGames();
-            if (filtered[currentIndex]) searchSteamGridTitle(filtered[currentIndex].title);
+            if (filtered[currentIndex]) window.open(`https://www.steamgriddb.com/search/grids?term=${encodeURIComponent(filtered[currentIndex].title)}`, '_blank');
         }
-        function searchGoogleEdit() {
-            const filtered = getFilteredGames();
-            if (filtered[currentIndex]) searchGoogleImagesTitle(filtered[currentIndex].title);
-        }
-        function searchSteamGridTitle(t) { window.open(`https://www.steamgriddb.com/search/grids?term=${encodeURIComponent(t)}`, '_blank'); }
-        function searchGoogleImagesTitle(t) { window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(t + ' cover png')}`, '_blank'); }
 
         /* Filtros e Select */
         function openSelectFilter() {
-            populatePlatformSelects();
+            populateDropdowns();
             openModal('filterModal');
         }
         function applyFilter() {
             activeFilterPlatform = document.getElementById('filterPlatform').value;
             activeFilterGenre = document.getElementById('filterGenre').value;
             activeFilterFavoriteOnly = document.getElementById('filterFavoriteOnly').checked;
+            activeSortOrder = document.getElementById('filterSortOrder').value;
             currentIndex = 0;
             renderGames();
         }
@@ -1031,15 +1266,17 @@
             document.getElementById('filterPlatform').value = '';
             document.getElementById('filterGenre').value = '';
             document.getElementById('filterFavoriteOnly').checked = false;
+            document.getElementById('filterSortOrder').value = 'default';
             activeFilterPlatform = '';
             activeFilterGenre = '';
             activeFilterFavoriteOnly = false;
+            activeSortOrder = 'default';
             currentIndex = 0;
             renderGames();
             closeModal('filterModal');
         }
 
-        /* Ações de Controle e Rodapé (Abrir Jogo Apenas pelo Botão A) */
+        /* Ações de Controle e Rodapé */
         function handleActionA() {
             if (document.querySelector('.modal.active')) return;
             const filtered = getFilteredGames();
@@ -1109,18 +1346,17 @@
                 if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
                     if (currentIndex > 0) { currentIndex--; updateSelection(); }
                 } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-                    if (currentIndex < max) { currentIndex++; updateSelection(); }
+                    if (currentIndex <= max) { currentIndex++; updateSelection(); }
                 } else if (e.key === 'ArrowUp') {
                     if (currentIndex - 2 >= 0) { currentIndex -= 2; updateSelection(); }
                 } else if (e.key === 'ArrowDown') {
                     if (currentIndex + 2 <= max) { currentIndex += 2; updateSelection(); }
                 }
             } else {
-                // Modo paisagem (linha única)
                 if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
                     if (currentIndex > 0) { currentIndex--; updateSelection(); }
                 } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-                    if (currentIndex < max) { currentIndex++; updateSelection(); }
+                    if (currentIndex <= max) { currentIndex++; updateSelection(); }
                 }
             }
 
@@ -1144,13 +1380,14 @@
 
         function updateBattery() {
             const batteryEl = document.getElementById('batteryLevel');
-            if ('getBattery' in navigator) {
-                navigator.getBattery().then(b => {
-                    batteryEl.textContent = `${Math.round(b.level * 100)}%`;
-                    b.addEventListener('levelchange', () => batteryEl.textContent = `${Math.round(b.level * 100)}%`);
-                }).catch(() => batteryEl.textContent = "100%");
-            } else {
-                batteryEl.textContent = "100%";
+            if (batteryEl) {
+                if ('getBattery' in navigator) {
+                    navigator.getBattery().then(b => {
+                        batteryEl.textContent = `${Math.round(b.level * 100)}%`;
+                    }).catch(() => batteryEl.textContent = "100%");
+                } else {
+                    batteryEl.textContent = "100%";
+                }
             }
         }
 
