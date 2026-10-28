@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.24 Alpha</title>
+    <title>Nexus Frontend v0.18 Alpha</title>
     <style>
         :root {
             --cw-p: 150px;
@@ -37,7 +37,7 @@
             left: 0;
         }
 
-        /* Efeitos de Sombra */
+        /* Efeitos de Esmaecimento (Sombras) */
         .top-fade {
             position: absolute;
             top: 0;
@@ -60,27 +60,37 @@
             z-index: 15;
         }
 
-        /* Topo Fixo Dinâmico */
+        /* Topo Fixo Dinâmico (Retrato vs Paisagem) */
         .top-bar {
             display: flex;
             z-index: 20;
             background: rgba(0,0,0,0.6);
         }
 
+        /* Modo Retrato: 2 Linhas */
         .top-bar.portrait {
             flex-direction: column;
             padding: 10px 15px;
             gap: 6px;
             min-height: 75px;
         }
-        .top-bar.portrait .top-row-1, .top-bar.portrait .top-row-2 {
+        .top-bar.portrait .top-row-1 {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
         }
-        .top-bar.portrait .game-title { max-width: 50vw; }
+        .top-bar.portrait .top-row-2 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .top-bar.portrait .game-title {
+            max-width: 50vw;
+        }
 
+        /* Modo Paisagem: 1 Linha com Margem de Segurança */
         .top-bar.landscape {
             flex-direction: row;
             justify-content: space-between;
@@ -94,7 +104,14 @@
             gap: 8px;
             max-width: 50vw;
         }
-        .top-bar.landscape .game-title { max-width: 35vw; }
+        .top-bar.landscape .top-right-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .top-bar.landscape .game-title {
+            max-width: 35vw;
+        }
 
         .orientation-btn {
             background: rgba(255, 255, 255, 0.15);
@@ -158,7 +175,7 @@
             cursor: pointer;
         }
 
-        /* Container de Jogos */
+        /* Container de Jogos com rolagem por gestos nativa */
         .carousel-container {
             flex: 1;
             overflow: auto;
@@ -167,7 +184,10 @@
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
         }
-        .carousel-container::-webkit-scrollbar { display: none; }
+
+        .carousel-container::-webkit-scrollbar {
+            display: none;
+        }
 
         .carousel-container.portrait {
             display: grid;
@@ -196,8 +216,15 @@
             cursor: pointer;
         }
 
-        .portrait .game-card { width: var(--cw-p); height: var(--ch-p); }
-        .landscape .game-card { width: var(--cw-l); height: var(--ch-l); }
+        .portrait .game-card {
+            width: var(--cw-p);
+            height: var(--ch-p);
+        }
+
+        .landscape .game-card {
+            width: var(--cw-l);
+            height: var(--ch-l);
+        }
 
         .game-card img {
             width: 100%;
@@ -244,7 +271,7 @@
             filter: drop-shadow(0 1px 2px rgba(0,0,0,0.9));
         }
 
-        /* Card Adicionar (+) */
+        /* Card de Adicionar Jogo (+) */
         .add-card {
             flex: 0 0 auto;
             border-radius: var(--card-radius);
@@ -258,13 +285,27 @@
             cursor: pointer;
             transition: transform 0.2s, border-color 0.2s;
         }
-        .portrait .add-card { width: var(--cw-p); height: var(--ch-p); }
-        .landscape .add-card { width: var(--cw-l); height: var(--ch-l); }
-        .add-card.selected { border-color: var(--select-color); transform: scale(1.05); background: rgba(255, 255, 255, 0.12); }
+
+        .portrait .add-card {
+            width: var(--cw-p);
+            height: var(--ch-p);
+        }
+
+        .landscape .add-card {
+            width: var(--cw-l);
+            height: var(--ch-l);
+        }
+
+        .add-card.selected {
+            border-color: var(--select-color);
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
         .add-icon { font-size: 38px; color: #aaa; }
         .add-text { font-size: 11px; color: #aaa; font-weight: bold; }
 
-        /* Rodapé */
+        /* Rodapé Fixo */
         .bottom-bar {
             display: flex;
             justify-content: center;
@@ -278,14 +319,33 @@
             min-height: 45px;
         }
 
-        .button-hint { display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 3px 6px; border-radius: 6px; }
-        .btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-weight: bold; font-size: 9px; color: #000; }
+        .button-hint {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 3px 6px;
+            border-radius: 6px;
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 9px;
+            color: #000;
+        }
+
         .btn-a { background-color: #4CD964; }
         .btn-b { background-color: #FF3B30; color: #fff; }
         .btn-x { background-color: #007AFF; color: #fff; }
         .btn-y { background-color: #FFCC00; }
 
-        /* Modais */
+        /* Modais Responsivos (Sem Estouro nas Bordas) */
         .modal {
             position: fixed;
             top: 0; left: 0;
@@ -310,6 +370,7 @@
             text-align: center;
             box-sizing: border-box;
         }
+
         .modal-content h2 { margin-bottom: 8px; font-size: 15px; }
 
         .settings-grid {
@@ -325,32 +386,95 @@
             padding: 8px;
             border-radius: 6px;
         }
-        .settings-box h3 { font-size: 10px; color: #888; margin-bottom: 4px; text-transform: uppercase; }
 
-        .input-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 5px; }
-        .input-row input, .input-row select {
-            background: #222; border: 1px solid #444; color: white; padding: 5px; border-radius: 4px; font-size: 11px; width: 100%;
+        .settings-box h3 {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 4px;
+            text-transform: uppercase;
         }
+
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-bottom: 5px;
+        }
+
+        .input-row input, .input-row select {
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 11px;
+            width: 100%;
+        }
+
         .input-row label { font-size: 10px; color: #aaa; }
 
-        .cover-tools { display: flex; gap: 4px; margin-top: 2px; }
+        .cover-tools {
+            display: flex;
+            gap: 4px;
+            margin-top: 2px;
+        }
         .cover-tools button {
-            flex: 1; background: #2b2b2b; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-size: 10px; cursor: pointer;
+            flex: 1;
+            background: #2b2b2b;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 4px;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
         }
 
-        .color-grid { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-        .color-swatch { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .color-grid {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .color-swatch {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
         .color-swatch.active { border-color: #fff; transform: scale(1.1); }
 
-        .modal-actions { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
-        .modal-btn { background: #333; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 11px; }
+        .modal-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 6px;
+        }
+
+        .modal-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+        }
         .modal-btn.primary { background: #007AFF; }
         .modal-btn.danger { background: #FF3B30; }
         .modal-btn.warning { background: #FF9500; }
 
+        /* Media Query para empilhar em telas estreitas (evita estouro no modo retrato) */
         @media (max-width: 480px) {
-            .settings-grid { grid-template-columns: 1fr; }
-            .modal-content { width: 95%; padding: 10px; max-height: 90vh; }
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 10px;
+                max-height: 90vh;
+            }
         }
     </style>
 </head>
@@ -369,10 +493,10 @@
         <div class="button-hint" onclick="handleActionX()"><span class="btn-icon btn-x">X</span> Aleatório</div>
     </div>
 
-    <!-- Modal Configurações -->
+    <!-- Modal Configurações Reformulado -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2 id="settingsModalTitle">Configurações do Nexus v0.24</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.18</h2>
             <div class="settings-grid">
                 <div class="settings-box">
                     <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
@@ -409,7 +533,7 @@
                         </div>
                     </div>
                     <div class="input-row" style="margin-top:6px;">
-                        <label>Novo Gênero:</label>
+                        <label>Novo Gênero / Plataforma:</label>
                         <div style="display:flex; gap:4px;">
                             <input type="text" id="customGenreInput" placeholder="Gênero" style="flex:1;">
                             <button type="button" class="modal-btn warning" style="padding:4px;" onclick="addCustomGenre()">+</button>
@@ -417,8 +541,8 @@
                     </div>
                 </div>
             </div>
-            <div style="padding:6px; background:rgba(255,255,255,0.03); border-radius:6px; text-align:left; margin-bottom:6px;">
-                <h3 style="font-size:10px; color:#888; margin-bottom:4px;">Backup e Reset</h3>
+            <div class="settings-group" style="padding:6px; background:rgba(255,255,255,0.03); border-radius:6px; text-align:left; margin-bottom:6px;">
+                <h3 style="font-size:10px; color:#888; margin-bottom:4px;">Backup, Restauração e Reset</h3>
                 <div style="display:flex; gap:6px;">
                     <button type="button" class="modal-btn primary" style="flex:1; padding:4px;" onclick="exportBackup()">Exportar</button>
                     <button type="button" class="modal-btn warning" style="flex:1; padding:4px;" onclick="document.getElementById('importFile').click()">Importar</button>
@@ -456,7 +580,7 @@
                         <label>URL da Capa:</label>
                         <input type="text" id="newGameCoverUrl" placeholder="https://...">
                         <div class="cover-tools">
-                            <button type="button" onclick="autoFetchCover('newGameTitle', 'newGameCoverUrl')">⚡ Auto Buscar</button>
+                            <button type="button" onclick="autoFetchCover()">⚡ Auto Buscar</button>
                             <button type="button" onclick="searchSteamGrid('newGameTitle')">🔍 SteamGrid</button>
                         </div>
                     </div>
@@ -466,37 +590,4 @@
                             <option value="aethersx2">AetherSX2 (PS2)</option>
                             <option value="snes9x">Snes9x (SNES)</option>
                             <option value="pizzaboy">Pizza Boy (GBA)</option>
-                            <option value="ppsspp">PPSSPP (PSP)</option>
-                            <option value="vita3k">Vita3K (PS Vita)</option>
-                            <option value="dolphin">Dolphin (GC/Wii)</option>
-                            <option value="eden">Eden (Switch)</option>
-                            <option value="gamehub">Gamehub (PC)</option>
-                            <option value="native">Nativo</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <button type="button" class="modal-btn primary" style="width: 100%; margin-top: 4px;" onclick="addNewGame()">Salvar Jogo</button>
-            <div class="modal-actions">
-                <button type="button" class="modal-btn" onclick="closeModal('addGameModal')">Cancelar (B)</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Configurar / Excluir Jogo -->
-    <div class="modal" id="gameConfigModal">
-        <div class="modal-content">
-            <h2 id="editGameTitleModal">Configurar Jogo</h2>
-            <div class="settings-grid">
-                <div class="settings-box">
-                    <div class="input-row">
-                        <label>Plataforma:</label>
-                        <select id="editGamePlatform"></select>
-                    </div>
-                    <div class="input-row">
-                        <label>Gênero:</label>
-                        <select id="editGameGenre"></select>
-                    </div>
-                    <div class="input-row" style="flex-direction: row; align-items: center; gap: 6px; margin-top: 8px;">
-                        <input type="checkbox" id="editGameFavorite" style="width: 16px; height: 16px;">
-                       
+                         
