@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.18 Alpha</title>
+    <title>Nexus Frontend v0.19 Alpha</title>
     <style>
         :root {
             --cw-p: 150px;
@@ -465,7 +465,6 @@
         .modal-btn.danger { background: #FF3B30; }
         .modal-btn.warning { background: #FF9500; }
 
-        /* Media Query para empilhar em telas estreitas (evita estouro no modo retrato) */
         @media (max-width: 480px) {
             .settings-grid {
                 grid-template-columns: 1fr;
@@ -493,10 +492,10 @@
         <div class="button-hint" onclick="handleActionX()"><span class="btn-icon btn-x">X</span> Aleatório</div>
     </div>
 
-    <!-- Modal Configurações Reformulado -->
+    <!-- Modal Configurações -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2 id="settingsModalTitle">Configurações do Nexus v0.18</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.19</h2>
             <div class="settings-grid">
                 <div class="settings-box">
                     <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
@@ -589,4 +588,6 @@
                         <select id="newGameExecType">
                             <option value="aethersx2">AetherSX2 (PS2)</option>
                             <option value="snes9x">Snes9x (SNES)</option>
-                            <option value="pizzaboy">Pizza Boy (GBA)</
+                            <option value="pizzaboy">Pizza Boy (GBA)</option>
+                            <option value="ppsspp">PPSSPP (PSP)</option>
+                      
