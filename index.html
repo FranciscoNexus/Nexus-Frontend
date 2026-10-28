@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.15 Alpha</title>
+    <title>Nexus Frontend v0.16 Alpha</title>
     <style>
         :root {
             --cw-p: 150px;
@@ -175,13 +175,14 @@
             cursor: pointer;
         }
 
-        /* Container de Jogos */
+        /* Container de Jogos com rolagem por gestos nativa */
         .carousel-container {
             flex: 1;
             overflow: auto;
             padding: 65px 15px;
             scrollbar-width: none;
             scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
 
         .carousel-container::-webkit-scrollbar {
@@ -303,29 +304,6 @@
 
         .add-icon { font-size: 38px; color: #aaa; }
         .add-text { font-size: 11px; color: #aaa; font-weight: bold; }
-
-        /* Zonas Invisíveis de Navegação Rápida (Metade Esquerda / Metade Direita) */
-        .nav-zone-left {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            width: 50vw;
-            height: calc(100vh - 110px);
-            z-index: 5;
-            pointer-events: auto;
-            cursor: default;
-        }
-
-        .nav-zone-right {
-            position: fixed;
-            top: 60px;
-            right: 0;
-            width: 50vw;
-            height: calc(100vh - 110px);
-            z-index: 5;
-            pointer-events: auto;
-            cursor: default;
-        }
 
         /* Rodapé Fixo */
         .bottom-bar {
@@ -490,10 +468,6 @@
     <div class="top-fade"></div>
     <div class="top-bar" id="topBarElement"></div>
 
-    <!-- Zonas invisíveis de navegação rápida -->
-    <div class="nav-zone-left" onclick="jumpToStart()"></div>
-    <div class="nav-zone-right" onclick="jumpToEnd()"></div>
-
     <div class="carousel-container" id="carousel"></div>
 
     <div class="bottom-fade"></div>
@@ -507,7 +481,7 @@
     <!-- Modal Configurações Reformulado -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2 id="settingsModalTitle">Configurações do Nexus v0.15</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.16</h2>
             <div class="settings-grid">
                 <div class="settings-box">
                     <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
@@ -547,7 +521,7 @@
                         <label>Novo Gênero / Plataforma:</label>
                         <div style="display:flex; gap:4px;">
                             <input type="text" id="customGenreInput" placeholder="Gênero" style="flex:1;">
-                            <button type="button" class="modal-btn warning" style="padding:4px;" onclick="addCustomGenre()">+</Genre>
+                            <button type="button" class="modal-btn warning" style="padding:4px;" onclick="addCustomGenre()">+</button>
                         </div>
                     </div>
                 </div>
@@ -807,7 +781,6 @@
             if (document.getElementById('sizeValL')) document.getElementById('sizeValL').textContent = wL;
             if (document.getElementById('cardRadiusSelect')) document.getElementById('cardRadiusSelect').value = visualPrefs.radius;
 
-            // Ativa o swatch correto
             document.querySelectorAll('.color-swatch').forEach(sw => {
                 if (sw.style.backgroundColor === hexToRgb(visualPrefs.color) || sw.style.backgroundColor === visualPrefs.color) {
                     sw.classList.add('active');
@@ -820,10 +793,10 @@
         function hexToRgb(hex) {
             let c;
             if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
-                c= hex.substring(1).split('');
-                if(c.length==3){ c= [c[0], c[0], c[1], c[1], c[2], c[2]]; }
-                c= '0x'+c.join('');
-                return 'rgb('+[(c>>16)&255, (c>>8)&255, c&255].join(', ')+')';
+                c = hex.substring(1).split('');
+                if(c.length == 3){ c = [c[0], c[0], c[1], c[1], c[2], c[2]]; }
+                c = '0x' + c.join('');
+                return 'rgb(' + [(c>>16)&255, (c>>8)&255, c&255].join(', ') + ')';
             }
             return hex;
         }
@@ -908,7 +881,6 @@
         }
 
         function openSettingsModal() {
-            // Exibe apenas a barra correspondente à orientação atual
             if (currentOrientation === 'portrait') {
                 document.getElementById('layoutSliderTitle').textContent = 'Ajuste Retrato';
                 document.getElementById('portraitSliderRow').style.display = 'block';
@@ -956,8 +928,6 @@
 
         function getFilteredGames() {
             let list = games.map((g, i) => ({ ...g, originalIndex: i }));
-
-            // Se houver filtros explícitos aplicados (Plataforma, Gênero, Apenas Favoritos ou Ordenação no Modal)
             const isExplicitFilter = activeFilterPlatform !== '' || activeFilterGenre !== '' || activeFilterFavoriteOnly || activeSortOrder !== 'default';
 
             list = list.filter(g => {
@@ -980,18 +950,14 @@
                 return list;
             }
 
-            // Organização Padrão sem Filtro Explícito:
-            // 1. Top 3 Recentes (1º mais recente, 2º penúltimo, 3º antepenúltimo) - sem repetir
             let playedGames = list.filter(g => g.lastPlayedTimestamp).sort((a, b) => b.lastPlayedTimestamp - a.lastPlayedTimestamp);
             let topRecent = playedGames.slice(0, 3);
             let recentIds = new Set(topRecent.map(g => g.originalIndex));
 
-            // 2. Favoritos (A-Z) - sem repetir os recentes
             let favorites = list.filter(g => g.isFavorite && !recentIds.has(g.originalIndex));
             favorites.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
             let favIds = new Set(favorites.map(g => g.originalIndex));
 
-            // 3. Demais Jogos (A-Z) - sem repetir recentes e favoritos
             let others = list.filter(g => !recentIds.has(g.originalIndex) && !favIds.has(g.originalIndex));
             others.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
 
@@ -1002,7 +968,6 @@
             carousel.innerHTML = '';
             const filtered = getFilteredGames();
 
-            // Identifica IDs dos 3 mais recentes globais para o badge de relorinho
             let playedGames = [...games].map((g, i) => ({...g, originalIndex: i})).filter(g => g.lastPlayedTimestamp).sort((a, b) => b.lastPlayedTimestamp - a.lastPlayedTimestamp);
             let recentTop3Ids = new Set(playedGames.slice(0, 3).map(g => g.originalIndex));
 
@@ -1029,7 +994,6 @@
                 carousel.appendChild(card);
             });
 
-            // Card de Adicionar Jogo (+)
             const addCardIndex = filtered.length;
             const addCard = document.createElement('div');
             addCard.className = `add-card ${currentIndex === addCardIndex ? 'selected' : ''}`;
@@ -1066,25 +1030,12 @@
             }
         }
 
-        /* Atalhos de navegação rápida pelas zonas invisíveis */
-        function jumpToStart() {
-            currentIndex = 0;
-            updateSelection();
-        }
-
-        function jumpToEnd() {
-            const filtered = getFilteredGames();
-            currentIndex = filtered.length; // Posiciona no card de Adicionar (+)
-            updateSelection();
-        }
-
         function autoFetchCover() {
             const title = document.getElementById('newGameTitle').value.trim();
             if (!title) {
                 alert("Digite o título do jogo primeiro para buscar a capa.");
                 return;
             }
-            // Simulação de busca inteligente integrando link otimizado SteamGridDB
             const mockCoverUrl = `https://cdn2.steamgriddb.com/grid/${encodeURIComponent(title)}.jpg`;
             document.getElementById('newGameCoverUrl').value = mockCoverUrl;
             alert("Capa buscada automaticamente com sucesso!");
@@ -1183,7 +1134,6 @@
             }
             const game = filtered[currentIndex];
             
-            // Atualiza histórico de recentes
             games[game.originalIndex].lastPlayedTimestamp = Date.now();
             saveData();
 
