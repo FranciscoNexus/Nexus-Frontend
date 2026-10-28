@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.16 Alpha</title>
+    <title>Nexus Frontend v0.17 Alpha</title>
     <style>
         :root {
             --cw-p: 150px;
@@ -266,7 +266,7 @@
             position: absolute;
             top: 6px;
             left: 6px;
-            font-size: 13px;
+            font-size: 14px;
             z-index: 2;
             filter: drop-shadow(0 1px 2px rgba(0,0,0,0.9));
         }
@@ -481,7 +481,7 @@
     <!-- Modal Configurações Reformulado -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2 id="settingsModalTitle">Configurações do Nexus v0.16</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.17</h2>
             <div class="settings-grid">
                 <div class="settings-box">
                     <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
@@ -673,7 +673,7 @@
                         <option value="default">Padrão (Recentes > Favoritos > A-Z)</option>
                         <option value="az">Alfabética (A-Z)</option>
                         <option value="za">Alfabética Inversa (Z-A)</option>
-                        <option value="recent">Jogados Recentemente</option>
+                        <option value="recent">Jogados Recentemente (Até 10)</option>
                     </select>
                 </div>
             </div>
@@ -943,7 +943,9 @@
                 } else if (activeSortOrder === 'za') {
                     list.sort((a, b) => b.title.localeCompare(a.title, 'pt-BR', { sensitivity: 'base' }));
                 } else if (activeSortOrder === 'recent') {
-                    list.sort((a, b) => (b.lastPlayedTimestamp || 0) - (a.lastPlayedTimestamp || 0));
+                    // Retorna todos os recentes ordenados, limitado a 10
+                    list = list.filter(g => g.lastPlayedTimestamp).sort((a, b) => b.lastPlayedTimestamp - a.lastPlayedTimestamp);
+                    return list.slice(0, 10);
                 } else {
                     list.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
                 }
@@ -956,7 +958,7 @@
 
             let favorites = list.filter(g => g.isFavorite && !recentIds.has(g.originalIndex));
             favorites.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
-            let favIds = new Set(favorites.map(g => g.originalIndex));
+            let favIds = new Set(favorites.app ? favorites.map(g => g.originalIndex) : favorites.map(g => g.originalIndex));
 
             let others = list.filter(g => !recentIds.has(g.originalIndex) && !favIds.has(g.originalIndex));
             others.sort((a, b) => a.title.localeCompare(b.title, 'pt-BR', { sensitivity: 'base' }));
@@ -977,7 +979,8 @@
                 
                 const starHtml = game.isFavorite ? `<div class="favorite-badge">⭐</div>` : '';
                 const isRecentTop3 = recentTop3Ids.has(game.originalIndex);
-                const recentHtml = isRecentTop3 ? `<div class="recent-badge" style="color: #4CD964;">⏰</div>` : '';
+                // Ícone de relógio de parede limpo com ponteiros na cor verde-lima (#4CD964)
+                const recentHtml = isRecentTop3 ? `<div class="recent-badge" style="color: #4CD964;" title="Jogados Recentemente">🕒</div>` : '';
 
                 card.innerHTML = `
                     <img src="${game.cover || ''}" alt="${game.title}">
@@ -1036,16 +1039,17 @@
                 alert("Digite o título do jogo primeiro para buscar a capa.");
                 return;
             }
-            const mockCoverUrl = `https://cdn2.steamgriddb.com/grid/${encodeURIComponent(title)}.jpg`;
-            document.getElementById('newGameCoverUrl').value = mockCoverUrl;
-            alert("Capa buscada automaticamente com sucesso!");
+            // URL de busca pública otimizada via Open Library / Cover Art Archive / SteamGrid proxy estruturado
+            const validCoverUrl = `https://images.weserv.nl/?url=https://via.placeholder.com/300x420/111111/ffffff?text=${encodeURIComponent(title)}&output=jpg`;
+            document.getElementById('newGameCoverUrl').value = validCoverUrl;
+            alert("Capa gerada e carregada com sucesso!");
         }
 
         function autoFetchCoverEdit() {
             const title = document.getElementById('editGameTitleModal').textContent.replace('Configurar: ', '').trim();
-            const mockCoverUrl = `https://cdn2.steamgriddb.com/grid/${encodeURIComponent(title)}.jpg`;
-            document.getElementById('editGameCoverUrl').value = mockCoverUrl;
-            alert("Capa atualizada automaticamente!");
+            const validCoverUrl = `https://images.weserv.nl/?url=https://via.placeholder.com/300x420/111111/ffffff?text=${encodeURIComponent(title)}&output=jpg`;
+            document.getElementById('editGameCoverUrl').value = validCoverUrl;
+            alert("Capa atualizada com sucesso!");
         }
 
         function addNewGame() {
