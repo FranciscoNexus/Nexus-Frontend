@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.32 Alpha</title>
+    <title>Nexus Frontend v0.33 Alpha</title>
     <style>
         :root {
             --cw-p: 150px;
@@ -167,7 +167,6 @@
         }
         .carousel-container::-webkit-scrollbar { display: none; }
 
-        /* Correção para retrato: bloqueia completamente o overflow horizontal indesejado para tamanhos grandes */
         .carousel-container.portrait {
             display: grid;
             grid-template-columns: repeat(2, var(--cw-p));
@@ -177,7 +176,6 @@
             max-width: 100%;
         }
 
-        /* Correção para paisagem: remove padding vertical conflitante e centraliza perfeitamente no meio da tela */
         .carousel-container.landscape {
             display: flex;
             align-items: center;
@@ -372,7 +370,7 @@
     <!-- Modal Configurações -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2 id="settingsModalTitle">Configurações do Nexus v0.32</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.33</h2>
             <div class="settings-grid">
                 <div class="settings-box">
                     <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
@@ -1115,6 +1113,7 @@
             URL.revokeObjectURL(url);
         }
 
+        // Correção aplicada na v0.33 para importação robusta e sem perda de foco do input
         function importBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1123,18 +1122,32 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     if (data.games) games = data.games;
-                    if (data.platforms) platforms = data.platforms;
+                    if (data.platforms) {
+                        let loadedPlats = data.platforms;
+                        loadedPlats = loadedPlats.filter(p => p.name !== 'PC / Gamehub' && p.name !== 'GameCube / Wii');
+                        platforms.forEach(p => {
+                            if (!loadedPlats.some(lp => lp.name === p.name)) {
+                                loadedPlats.push(p);
+                            }
+                        });
+                        platforms = loadedPlats;
+                    }
                     if (data.genresList) genresList = data.genresList;
                     if (data.visualPrefs) visualPrefs = data.visualPrefs;
                     if (data.currentOrientation) currentOrientation = data.currentOrientation;
+                    
                     saveData();
                     applyVisualPrefs();
                     applyOrientationMode();
                     populateDropdowns();
                     renderGames();
                     closeModal('settingsModal');
+                    
+                    // Limpa o valor do input para permitir reimportação limpa do mesmo arquivo
+                    event.target.value = '';
                 } catch(err) {
                     console.error("Erro ao importar backup", err);
+                    alert("Erro ao ler o arquivo de backup. Certifique-se de que o arquivo JSON é válido.");
                 }
             };
             reader.readAsText(file);
