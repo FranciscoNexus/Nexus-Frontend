@@ -1,0 +1,17 @@
+{
+  "background_color": "#000000",
+  "dir": "ltr",
+  "display": "fullscreen",
+  "name": "Nexus Frontend",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "NEXUS",
+  "start_url": "https://francisconexus.github.io/Nexus-Frontend/",
+  "theme_color": "#2bb4fb",
+  "description": "Frontend de gerenciamento de jogos e emuladores.",
+  "id": "com.nexus.frontend",
+  "lang": "pt",
+  "categories": [
+    "games"
+  ]
+}
