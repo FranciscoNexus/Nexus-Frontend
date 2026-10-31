@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.28 Alpha</title>
+    <title>Nexus Frontend v0.29 Alpha</title>
     <style>
         :root {
             --cw-p: 150px;
@@ -367,7 +367,7 @@
     <!-- Modal Configurações -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2 id="settingsModalTitle">Configurações do Nexus v0.28</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.29</h2>
             <div class="settings-grid">
                 <div class="settings-box">
                     <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
@@ -427,7 +427,7 @@
         </div>
     </div>
 
-    <!-- Modal Adicionar Jogo (Simplificado - Sem campos de capa) -->
+    <!-- Modal Adicionar Jogo -->
     <div class="modal" id="addGameModal">
         <div class="modal-content">
             <h2>Adicionar Novo Jogo</h2>
@@ -472,7 +472,7 @@
         </div>
     </div>
 
-    <!-- Modal Configurar / Excluir Jogo (Com botão Colar Área de Transferência e SteamGridDB) -->
+    <!-- Modal Configurar / Excluir Jogo -->
     <div class="modal" id="gameConfigModal">
         <div class="modal-content">
             <h2 id="editGameTitleModal">Configurar Jogo</h2>
@@ -853,7 +853,6 @@
                 const isRecentTop3 = recentTop3Ids.has(game.originalIndex);
                 const recentHtml = isRecentTop3 ? `<div class="recent-badge" style="color: #4CD964;" title="Jogados Recentemente">🕒</div>` : '';
 
-                // Solução 3: Renderização de capa real ou Placeholder estilizado limpo com o título
                 const coverContent = (game.cover && game.cover.trim() !== '')
                     ? `<img src="${game.cover}" alt="${game.title}">`
                     : `<div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:12px; background: linear-gradient(135deg, #1f1f23, #111113); text-align:center;"><span style="font-size:12px; font-weight:bold; color:#fff; word-break:break-word; line-height:1.3; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${game.title}</span></div>`;
@@ -959,11 +958,20 @@
                         alert("A área de transferência está vazia.");
                     }
                 } else {
-                    alert("Leitura automática da área de transferência não suportada neste navegador. Use o toque longo no campo para colar.");
+                    alert("Leitura automática da área de transferência não suportada neste navegador.");
                 }
             } catch (err) {
                 console.error("Erro ao ler área de transferência: ", err);
                 alert("Permissão negada ou indisponível. Cole o link manualmente no campo.");
+            }
+        }
+
+        function searchSteamGridEdit() {
+            const gIndex = window.currentGameEditIndex;
+            if (games[gIndex] && games[gIndex].title) {
+                window.open(`https://www.steamgriddb.com/search/grids?term=${encodeURIComponent(games[gIndex].title)}`, '_blank');
+            } else {
+                window.open(`https://www.steamgriddb.com/`, '_blank');
             }
         }
 
@@ -1049,15 +1057,6 @@
                 }
             };
             reader.readAsText(file);
-        }
-
-        function searchSteamGridEdit() {
-            const filtered = getFilteredGames();
-            if (filtered[currentIndex]) {
-                window.open(`https://www.steamgriddb.com/search/grids?term=${encodeURIComponent(filtered[currentIndex].title)}`, '_blank');
-            } else {
-                window.open(`https://www.steamgriddb.com/`, '_blank');
-            }
         }
 
         function openSelectFilter() {
