@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.31 Alpha</title>
+    <title>Nexus Frontend v0.32 Alpha</title>
     <style>
         :root {
             --cw-p: 150px;
@@ -167,21 +167,24 @@
         }
         .carousel-container::-webkit-scrollbar { display: none; }
 
+        /* Correção para retrato: bloqueia completamente o overflow horizontal indesejado para tamanhos grandes */
         .carousel-container.portrait {
             display: grid;
             grid-template-columns: repeat(2, var(--cw-p));
             justify-content: center;
             gap: 15px;
+            overflow-x: hidden;
+            max-width: 100%;
         }
 
+        /* Correção para paisagem: remove padding vertical conflitante e centraliza perfeitamente no meio da tela */
         .carousel-container.landscape {
             display: flex;
             align-items: center;
             gap: 18px;
-            padding-left: 35px;
-            padding-right: 35px;
+            padding: 0 35px;
             overflow-x: auto;
-            overflow-y: hidden; /* Bloqueio estrito de rolagem vertical em paisagem */
+            overflow-y: hidden;
         }
 
         .game-card {
@@ -369,7 +372,7 @@
     <!-- Modal Configurações -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2 id="settingsModalTitle">Configurações do Nexus v0.31</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.32</h2>
             <div class="settings-grid">
                 <div class="settings-box">
                     <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
@@ -629,7 +632,6 @@
 
         let visualPrefs = { widthP: 150, widthL: 220, radius: '10px', color: '#007AFF' };
 
-        // Mapeamento automático atualizado e preciso de Plataforma para Emulador
         const platformToEmulatorMap = {
             'PlayStation 2': 'aethersx2',
             'Super Nintendo': 'snes9x',
@@ -663,7 +665,6 @@
                 const savedPlats = localStorage.getItem('nexus_platforms');
                 if (savedPlats) {
                     let loadedPlats = JSON.parse(savedPlats);
-                    // Remover registros antigos duplicados/combinados se existirem
                     loadedPlats = loadedPlats.filter(p => p.name !== 'PC / Gamehub' && p.name !== 'GameCube / Wii');
                     platforms.forEach(p => {
                         if (!loadedPlats.some(lp => lp.name === p.name)) {
@@ -1269,7 +1270,6 @@
             }
         }
 
-        // Monitoramento contínuo e em tempo real da bateria com indicador de carregamento (⚡)
         function updateBattery() {
             const batteryEl = document.getElementById('batteryLevel');
             if (batteryEl) {
