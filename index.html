@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.30 Alpha</title>
+    <title>Nexus Frontend v0.31 Alpha</title>
     <style>
         :root {
             --cw-p: 150px;
@@ -180,6 +180,8 @@
             gap: 18px;
             padding-left: 35px;
             padding-right: 35px;
+            overflow-x: auto;
+            overflow-y: hidden; /* Bloqueio estrito de rolagem vertical em paisagem */
         }
 
         .game-card {
@@ -367,7 +369,7 @@
     <!-- Modal Configurações -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2 id="settingsModalTitle">Configurações do Nexus v0.30</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.31</h2>
             <div class="settings-grid">
                 <div class="settings-box">
                     <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
@@ -460,6 +462,15 @@
                             <option value="dolphin">Dolphin (GC/Wii)</option>
                             <option value="eden">Eden (Switch)</option>
                             <option value="gamehub">Gamehub (PC)</option>
+                            <option value="duckstation">DuckStation (PS1)</option>
+                            <option value="m64plusfz">M64Plus FZ (N64)</option>
+                            <option value="drastic">DraStic (NDS)</option>
+                            <option value="citra">Citra (3DS)</option>
+                            <option value="xemu">xemu (Xbox)</option>
+                            <option value="xenia">Xenia (Xbox 360)</option>
+                            <option value="cemu">Cemu (Wii U)</option>
+                            <option value="mdemu">MD.emu (Mega Drive)</option>
+                            <option value="yabasanshiro">Yaba Sanshiro (Saturn)</option>
                             <option value="native">Nativo</option>
                         </select>
                     </div>
@@ -513,6 +524,15 @@
                             <option value="dolphin">Dolphin (GC/Wii)</option>
                             <option value="eden">Eden (Switch)</option>
                             <option value="gamehub">Gamehub (PC)</option>
+                            <option value="duckstation">DuckStation (PS1)</option>
+                            <option value="m64plusfz">M64Plus FZ (N64)</option>
+                            <option value="drastic">DraStic (NDS)</option>
+                            <option value="citra">Citra (3DS)</option>
+                            <option value="xemu">xemu (Xbox)</option>
+                            <option value="xenia">Xenia (Xbox 360)</option>
+                            <option value="cemu">Cemu (Wii U)</option>
+                            <option value="mdemu">MD.emu (Mega Drive)</option>
+                            <option value="yabasanshiro">Yaba Sanshiro (Saturn)</option>
                             <option value="native">Nativo</option>
                         </select>
                     </div>
@@ -609,7 +629,7 @@
 
         let visualPrefs = { widthP: 150, widthL: 220, radius: '10px', color: '#007AFF' };
 
-        // Mapeamento automático de Plataforma para Emulador padrão
+        // Mapeamento automático atualizado e preciso de Plataforma para Emulador
         const platformToEmulatorMap = {
             'PlayStation 2': 'aethersx2',
             'Super Nintendo': 'snes9x',
@@ -620,16 +640,16 @@
             'Wii': 'dolphin',
             'Nintendo Switch': 'eden',
             'PC': 'gamehub',
-            'PlayStation 1': 'native',
-            'Nintendo 64': 'native',
-            'Nintendo DS': 'native',
-            'Nintendo 3DS': 'native',
-            'Xbox Clássico': 'native',
-            'Xbox 360': 'native',
+            'PlayStation 1': 'duckstation',
+            'Nintendo 64': 'm64plusfz',
+            'Nintendo DS': 'drastic',
+            'Nintendo 3DS': 'citra',
+            'Xbox Clássico': 'xemu',
+            'Xbox 360': 'xenia',
             'PlayStation 4': 'native',
-            'Nintendo Wii U': 'native',
-            'Sega Mega Drive': 'native',
-            'Sega Saturn': 'native'
+            'Nintendo Wii U': 'cemu',
+            'Sega Mega Drive': 'mdemu',
+            'Sega Saturn': 'yabasanshiro'
         };
 
         const carousel = document.getElementById('carousel');
@@ -643,7 +663,8 @@
                 const savedPlats = localStorage.getItem('nexus_platforms');
                 if (savedPlats) {
                     let loadedPlats = JSON.parse(savedPlats);
-                    // Garantir que novas plataformas apareçam caso o usuário venha de um backup antigo
+                    // Remover registros antigos duplicados/combinados se existirem
+                    loadedPlats = loadedPlats.filter(p => p.name !== 'PC / Gamehub' && p.name !== 'GameCube / Wii');
                     platforms.forEach(p => {
                         if (!loadedPlats.some(lp => lp.name === p.name)) {
                             loadedPlats.push(p);
@@ -842,7 +863,6 @@
             });
         }
 
-        // Função que realiza a seleção automática do emulador com base na plataforma escolhida
         function onPlatformChange(mode) {
             const prefix = mode === 'new' ? 'newGame' : 'editGame';
             const platformEl = document.getElementById(prefix + 'Platform');
@@ -937,7 +957,6 @@
                 currentIndex = addCardIndex;
                 updateSelection();
                 openModal('addGameModal');
-                // Auto-selecionar emulador inicial ao abrir o modal de adição
                 onPlatformChange('new');
             };
             carousel.appendChild(addCard);
@@ -1250,13 +1269,23 @@
             }
         }
 
+        // Monitoramento contínuo e em tempo real da bateria com indicador de carregamento (⚡)
         function updateBattery() {
             const batteryEl = document.getElementById('batteryLevel');
             if (batteryEl) {
                 if ('getBattery' in navigator) {
-                    navigator.getBattery().then(b => {
-                        batteryEl.textContent = `${Math.round(b.level * 100)}%`;
-                    }).catch(() => batteryEl.textContent = "100%");
+                    navigator.getBattery().then(battery => {
+                        function renderBatteryStatus() {
+                            const level = Math.round(battery.level * 100);
+                            const charging = battery.charging;
+                            batteryEl.innerHTML = `${level}% ${charging ? '⚡' : ''}`;
+                        }
+                        renderBatteryStatus();
+                        battery.addEventListener('levelchange', renderBatteryStatus);
+                        battery.addEventListener('chargingchange', renderBatteryStatus);
+                    }).catch(() => {
+                        batteryEl.textContent = "100%";
+                    });
                 } else {
                     batteryEl.textContent = "100%";
                 }
