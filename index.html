@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Frontend v0.33 Alpha</title>
+    <title>Nexus Frontend v0.34 Alpha</title>
     <style>
         :root {
             --cw-p: 150px;
@@ -370,7 +370,7 @@
     <!-- Modal Configurações -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2 id="settingsModalTitle">Configurações do Nexus v0.33</h2>
+            <h2 id="settingsModalTitle">Configurações do Nexus v0.34</h2>
             <div class="settings-grid">
                 <div class="settings-box">
                     <h3 id="layoutSliderTitle">Ajuste de Tamanho</h3>
@@ -472,6 +472,7 @@
                             <option value="cemu">Cemu (Wii U)</option>
                             <option value="mdemu">MD.emu (Mega Drive)</option>
                             <option value="yabasanshiro">Yaba Sanshiro (Saturn)</option>
+                            <option value="browser">Navegador Web</option>
                             <option value="native">Nativo</option>
                         </select>
                     </div>
@@ -507,12 +508,16 @@
                     <div class="input-row">
                         <label>URL da Capa:</label>
                         <div style="display: flex; gap: 4px;">
-                            <input type="text" id="editGameCoverUrl" placeholder="Cole o link ou clique em colar..." style="flex: 1;">
+                            <input type="text" id="editGameCoverUrl" placeholder="Cole o link..." style="flex: 1;">
                             <button type="button" class="modal-btn warning" style="padding: 6px 10px;" onclick="pasteClipboardToEdit()" title="Colar da Área de Transferência">📋 Colar</button>
                         </div>
                         <div class="cover-tools" style="margin-top: 4px;">
                             <button type="button" onclick="searchSteamGridEdit()" style="width: 100%;">🔍 Procurar no SteamGridDB</button>
                         </div>
+                    </div>
+                    <div class="input-row">
+                        <label>Link Web do Jogo (URL):</label>
+                        <input type="text" id="editGameWebUrl" placeholder="https://exemplo.com/jogo">
                     </div>
                     <div class="input-row">
                         <label>Emulador:</label>
@@ -534,6 +539,7 @@
                             <option value="cemu">Cemu (Wii U)</option>
                             <option value="mdemu">MD.emu (Mega Drive)</option>
                             <option value="yabasanshiro">Yaba Sanshiro (Saturn)</option>
+                            <option value="browser">Navegador Web</option>
                             <option value="native">Nativo</option>
                         </select>
                     </div>
@@ -618,7 +624,8 @@
             { name: 'PlayStation 4', active: true },
             { name: 'Nintendo Wii U', active: true },
             { name: 'Sega Mega Drive', active: true },
-            { name: 'Sega Saturn', active: true }
+            { name: 'Sega Saturn', active: true },
+            { name: 'Web / Navegador', active: true }
         ];
         let genresList = ['Ação', 'Aventura', 'RPG', 'Corrida', 'Luta', 'Esportes', 'Plataforma', 'Tiro', 'Estratégia', 'Terror', 'Puzzle'];
         let currentIndex = 0;
@@ -649,7 +656,28 @@
             'PlayStation 4': 'native',
             'Nintendo Wii U': 'cemu',
             'Sega Mega Drive': 'mdemu',
-            'Sega Saturn': 'yabasanshiro'
+            'Sega Saturn': 'yabasanshiro',
+            'Web / Navegador': 'browser'
+        };
+
+        const emulatorPackageMap = {
+            'aethersx2': 'com.aethersx2.android',
+            'snes9x': 'com.explusalpha.Snes9xPlus',
+            'pizzaboy': 'it.alessandrorotta.pizzaboygba',
+            'ppsspp': 'org.ppsspp.ppsspp',
+            'vita3k': 'org.vita3k.emulator',
+            'dolphin': 'org.dolphinemu.dolphinemu',
+            'eden': 'com.eden.emulator',
+            'gamehub': 'com.gamehub.app',
+            'duckstation': 'com.github.stenzek.duckstation',
+            'm64plusfz': 'org.mupen64plusae.v3.fレイ',
+            'drastic': 'com.dsemu.drastic',
+            'citra': 'org.citra.citra_emu',
+            'xemu': 'app.xemu.android',
+            'xenia': 'jp.xenia.emulator',
+            'cemu': 'info.cemu.Cemu',
+            'mdemu': 'com.explusalpha.MDemu',
+            'yabasanshiro': 'org.devmiyax.yabause'
         };
 
         const carousel = document.getElementById('carousel');
@@ -663,7 +691,6 @@
                 const savedPlats = localStorage.getItem('nexus_platforms');
                 if (savedPlats) {
                     let loadedPlats = JSON.parse(savedPlats);
-                    loadedPlats = loadedPlats.filter(p => p.name !== 'PC / Gamehub' && p.name !== 'GameCube / Wii');
                     platforms.forEach(p => {
                         if (!loadedPlats.some(lp => lp.name === p.name)) {
                             loadedPlats.push(p);
@@ -996,7 +1023,7 @@
                 return;
             }
 
-            games.push({ title, platform, genre, cover: '', execType, isFavorite: false });
+            games.push({ title, platform, genre, cover: '', webUrl: '', execType, isFavorite: false });
             saveData();
             populateDropdowns();
             renderGames();
@@ -1020,6 +1047,7 @@
             document.getElementById('editGamePlatform').value = game.platform || '';
             document.getElementById('editGameGenre').value = game.genre || genresList[0];
             document.getElementById('editGameCoverUrl').value = game.cover || '';
+            document.getElementById('editGameWebUrl').value = game.webUrl || '';
             document.getElementById('editGameExecType').value = game.execType || 'aethersx2';
             document.getElementById('editGameFavorite').checked = !!game.isFavorite;
             window.currentGameEditIndex = realIndex;
@@ -1059,6 +1087,7 @@
                 games[gIndex].platform = document.getElementById('editGamePlatform').value;
                 games[gIndex].genre = document.getElementById('editGameGenre').value;
                 games[gIndex].cover = document.getElementById('editGameCoverUrl').value.trim();
+                games[gIndex].webUrl = document.getElementById('editGameWebUrl').value.trim();
                 games[gIndex].execType = document.getElementById('editGameExecType').value;
                 
                 const isFavNow = document.getElementById('editGameFavorite').checked;
@@ -1100,6 +1129,33 @@
             games[game.originalIndex].lastPlayedTimestamp = Date.now();
             saveData();
             renderGames();
+
+            const execType = game.execType || 'native';
+
+            if (execType === 'browser') {
+                const targetUrl = game.webUrl;
+                if (!targetUrl) {
+                    alert("Nenhum link web cadastrado para este jogo. Configure o link no menu START.");
+                    return;
+                }
+                try {
+                    const browserIntentUri = `intent://${targetUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
+                    window.location.href = browserIntentUri;
+                } catch(e) {
+                    window.open(targetUrl, '_blank');
+                }
+                return;
+            }
+
+            const pkg = emulatorPackageMap[execType];
+            if (pkg && pkg !== 'native') {
+                try {
+                    const intentUri = `intent:#Intent;package=${pkg};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end`;
+                    window.location.href = intentUri;
+                } catch (e) {
+                    console.warn("Intents nativos bloqueados pelo navegador.", e);
+                }
+            }
         }
 
         function exportBackup() {
@@ -1113,7 +1169,6 @@
             URL.revokeObjectURL(url);
         }
 
-        // Correção aplicada na v0.33 para importação robusta e sem perda de foco do input
         function importBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1124,7 +1179,6 @@
                     if (data.games) games = data.games;
                     if (data.platforms) {
                         let loadedPlats = data.platforms;
-                        loadedPlats = loadedPlats.filter(p => p.name !== 'PC / Gamehub' && p.name !== 'GameCube / Wii');
                         platforms.forEach(p => {
                             if (!loadedPlats.some(lp => lp.name === p.name)) {
                                 loadedPlats.push(p);
@@ -1143,11 +1197,10 @@
                     renderGames();
                     closeModal('settingsModal');
                     
-                    // Limpa o valor do input para permitir reimportação limpa do mesmo arquivo
                     event.target.value = '';
                 } catch(err) {
                     console.error("Erro ao importar backup", err);
-                    alert("Erro ao ler o arquivo de backup. Certifique-se de que o arquivo JSON é válido.");
+                    alert("Erro ao ler o arquivo de backup.");
                 }
             };
             reader.readAsText(file);
@@ -1305,7 +1358,6 @@
             }
         }
 
-        // Inicialização protegida contra erros e tela preta
         try {
             loadData();
             renderGames();
